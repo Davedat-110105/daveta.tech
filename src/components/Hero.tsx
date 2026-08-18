@@ -1,6 +1,5 @@
 import { HeroField } from "@/components/HeroField";
 import { PointerDrift } from "@/components/PointerDrift";
-import { DecoderText } from "@/components/DecoderText";
 import { links } from "@/data/content";
 
 export function Hero() {
@@ -18,10 +17,6 @@ export function Hero() {
 
       <div className="hero-exit relative">
         <PointerDrift className="grid max-w-[1000px] gap-7">
-          <p className="m-0 font-mono text-[12px] tracking-[0.16em] text-accent [animation:riseIn_0.7s_ease_both]">
-            <DecoderText text="SOFTWARE ENGINEER · TORONTO" />
-          </p>
-
           {/* "I'm Dave." leads in at a smaller scale so the claim itself stays a
             two-line headline rather than a four-line paragraph. */}
           <h1 className="m-0 font-display font-semibold leading-[1.02] tracking-[-0.025em]">
