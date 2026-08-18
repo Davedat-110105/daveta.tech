@@ -1,0 +1,431 @@
+@import "tailwindcss";
+
+/* Signal-orange on graphite. One accent, locked page-wide.
+   Contrast against --bg (#0B0B0C, L 0.0034) noted per token; AA is 4.5:1 for
+   body and 3:1 for large text. */
+:root {
+  --bg: #0b0b0c;
+  --panel: #131315;
+  --panel-deep: #0f0f11;
+  --fg: #f2f1ee; /* 17.1 : 1 */
+  --fg-dim: #dedcd7; /* 13.8 : 1 */
+  --mute: #a8a6a0; /* 8.08 : 1 */
+  --mute-2: #94918a; /* 6.25 : 1 */
+  --mute-3: #7d7a74; /* 4.59 : 1 */
+  --mute-4: #7d7a74; /* 4.59 : 1 */
+  --faint: #6a6862; /* 3.54 : 1 - large text and rules only */
+  --faint-2: #565048; /* 2.48 : 1 - display numerals only */
+  --accent: #ff7a45; /* 7.60 : 1 */
+  --accent-soft: #ffa57e; /* 10.2 : 1 */
+  --line: rgb(255 255 255 / 0.09);
+  --line-soft: rgb(255 255 255 / 0.06);
+  --line-strong: rgb(255 255 255 / 0.14);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-deep: var(--panel-deep);
+  --color-fg: var(--fg);
+  --color-fg-dim: var(--fg-dim);
+  --color-mute: var(--mute);
+  --color-mute-2: var(--mute-2);
+  --color-mute-3: var(--mute-3);
+  --color-mute-4: var(--mute-4);
+  --color-faint: var(--faint);
+  --color-faint-2: var(--faint-2);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-line-strong: var(--line-strong);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* The nav is fixed, so anchor targets need to clear it. */
+:target,
+section[id],
+header[id] {
+  scroll-margin-top: 92px;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* `clip`, not `hidden`: hidden makes the body a scroll container, which
+     detaches every view() timeline on the page from the real scroll position.
+     clip suppresses the same horizontal overflow without creating one. */
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* In @layer base so utility classes on individual links still win. Unlayered,
+   this rule beats every Tailwind text-* utility on every anchor. */
+@layer base {
+  a {
+    color: var(--accent-soft);
+    text-decoration: none;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lineUp {
+  from {
+    transform: translateY(112%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* ── Hero: signal lock ────────────────────────────────────────────────────
+   The accent word is the focal moment. A trace draws under it left to right
+   with a bright leading edge, then the head fades and leaves a calm accent
+   rule. Two pseudo-elements on one span: ::before is the resting rule,
+   ::after is the sweep that cools off. Both sit inside the em box so the
+   line's overflow mask never clips them. */
+.trace-word {
+  position: relative;
+  display: inline-block;
+}
+
+.trace-word::before,
+.trace-word::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.04em;
+  height: 0.05em;
+  pointer-events: none;
+}
+
+.trace-word::before {
+  background: var(--accent);
+  opacity: 0;
+  animation: traceSettle 0.5s 1.75s ease both;
+}
+
+.trace-word::after {
+  background: linear-gradient(
+    90deg,
+    rgb(255 122 69 / 0) 0%,
+    var(--accent) 42%,
+    #fff2e8 100%
+  );
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  animation:
+    traceDraw 0.8s 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) both,
+    traceCool 0.5s 1.75s ease both;
+}
+
+@keyframes traceDraw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes traceCool {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes traceSettle {
+  to {
+    opacity: 1;
+  }
+}
+
+/* The hero hands off to the page instead of just scrolling away: as it exits
+   the viewport the type drifts up and dims. Scroll-driven, so it is tied to
+   position rather than time, and it stops at 0.35 opacity so scrolling back
+   never finds a blank hero. */
+.hero-exit {
+  animation-name: heroExit;
+  /* `auto` is what binds the animation to the full range of a scroll
+     timeline. The `animation` shorthand would set duration to 0s and the
+     animation would never advance. */
+  animation-duration: auto;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  /* Driven off the document scroll rather than the element's own view
+     progress: the hero is the first thing on the page, so "how far you have
+     scrolled" and "how far the hero has left" are the same measurement, and
+     scroll() does not depend on the element's box geometry. */
+  animation-timeline: scroll(root block);
+  animation-range: 0 100vh;
+}
+
+@keyframes heroExit {
+  to {
+    transform: translateY(-44px);
+    opacity: 0.35;
+  }
+}
+
+/* Nav label that rolls to its accent copy on hover. */
+.swap {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.4em;
+}
+
+.swap-col {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.swap:hover .swap-col,
+.swap:focus-visible .swap-col,
+.nav-link:hover .swap-col,
+.nav-link:focus-visible .swap-col {
+  transform: translateY(-50%);
+}
+
+.swap-col > span {
+  line-height: 1.4;
+}
+
+/* Scroll reveal. The element ships hidden and flips on a single data attribute;
+   the <noscript> rule in the layout forces it visible when scripts are off. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(var(--reveal-y, 18px));
+  filter: blur(6px);
+  transition:
+    opacity 0.72s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.72s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.72s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+[data-reveal][data-shown="true"] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  will-change: auto;
+}
+
+/* Placeholder plate for image slots whose asset has not been supplied yet.
+   A drafting grid with corner ticks reads as an intentional reserved plate
+   rather than a blank rectangle, which matters while six covers are missing. */
+.slot-plate {
+  background-color: var(--panel);
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.028) 1px, transparent 1px),
+    radial-gradient(120% 90% at 50% 0%, rgb(255 122 69 / 0.05), transparent 65%);
+  background-size:
+    28px 28px,
+    28px 28px,
+    100% 100%;
+}
+
+.slot-plate::before,
+.slot-plate::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--faint);
+  opacity: 0.65;
+}
+
+.slot-plate::before {
+  top: 10px;
+  left: 10px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+
+.slot-plate::after {
+  bottom: 10px;
+  right: 10px;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+}
+
+.rail {
+  scrollbar-width: none;
+}
+
+/* The deploy rail is a scrollable region, so it takes focus and shows it. */
+.rail:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+}
+
+.rail::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Deploy cards ─────────────────────────────────────────────────────────
+   Everything about the card's transform lives here rather than in utility
+   classes, because the fan below composes several independent offsets
+   (neighbour shift, hover lift, fan rotation, arc dip) into one transform.
+   Tailwind's translate/rotate utilities emit separate properties that would
+   stack on top of this instead of replacing it. */
+.deploy-card {
+  --shift: 0px;
+  --lift: 0px;
+  --dip: 0px;
+  --rot: 0deg;
+  transform: translate3d(var(--shift), calc(var(--dip) + var(--lift)), 0)
+    rotate(var(--rot));
+  transition:
+    transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.deploy-card:is(:hover, :focus-within) {
+  --lift: -6px;
+  --rot: -0.4deg;
+}
+
+/* ── The hand ─────────────────────────────────────────────────────────────
+   On a wide, pointer-driven screen the rail closes into a held hand. Rotation
+   pivots at the bottom edge, so the cards splay from a shared base like tabs
+   standing in a bucket, and a squared term drops the outer ones onto an arc.
+   Hovering or focusing one lifts it, straightens it, brings it to the front,
+   and pushes its neighbours aside.
+
+   Gated on `hover: hover` as well as width: without a pointer there is no way
+   to reveal an occluded card, so touch screens keep the scrollable rail. */
+@media (min-width: 1280px) and (hover: hover) {
+  .deploy-fan {
+    justify-content: center;
+    gap: 0;
+    overflow: visible;
+    scroll-snap-type: none;
+    padding-top: 3.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .deploy-fan-arrows {
+    display: none;
+  }
+
+  .deploy-card {
+    /* 6 × 300px cards on a 172px step span 1160px — inside the 1176px
+       content column, with room left for the neighbour spread. */
+    --step: 172px;
+    --spread: 20px;
+    --rot: calc(var(--off) * 2.4deg);
+    --dip: calc(var(--off) * var(--off) * 2.2px);
+    width: 300px;
+    margin-left: calc(var(--step) - 300px);
+    transform-origin: 50% 100%;
+    z-index: calc(10 + var(--i));
+  }
+
+  .deploy-card:first-child {
+    margin-left: 0;
+  }
+
+  .deploy-card:is(:hover, :focus-within) {
+    --lift: -30px;
+    --rot: 0deg;
+    z-index: 60;
+  }
+
+  /* Cards after the raised one slide right; cards before it slide left. */
+  .deploy-card:is(:hover, :focus-within) ~ .deploy-card {
+    --shift: var(--spread);
+  }
+
+  .deploy-card:has(~ .deploy-card:is(:hover, :focus-within)) {
+    --shift: calc(var(--spread) * -1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* A scroll timeline ignores animation-duration, so collapsing durations
+     above does not stop the hero drift. Turn it off outright. */
+  .hero-exit {
+    animation: none;
+  }
+
+  /* Reveals must still resolve to visible, they just do it instantly. */
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
