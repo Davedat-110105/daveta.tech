@@ -43,17 +43,11 @@ const PROJECTS = [
   {
     title: "MCP Platform",
     descriptor: "Railway-hosted agent data gateway",
-    image: "/assets/shot-mcp-platform.webp",
+    image: "/assets/shot-mcp-live-docs.webp",
     href: "https://gateway-production-c71a.up.railway.app/docs",
     span: "md:col-span-12",
   },
 ];
-
-const HALFTONE = {
-  backgroundImage:
-    "radial-gradient(circle, hsl(var(--bg)) 1px, transparent 1px)",
-  backgroundSize: "4px 4px",
-};
 
 export function SelectedWorks() {
   return (
@@ -109,12 +103,6 @@ export function SelectedWorks() {
                 className="absolute inset-0 size-full object-cover"
                 plateClassName="rounded-3xl border-0"
               />
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 opacity-20 mix-blend-multiply"
-                style={HALFTONE}
-              />
-
               {/*
                * The title sits on the card, always. The template hid it behind
                * a hover overlay — an animated gradient pill over a blurred
