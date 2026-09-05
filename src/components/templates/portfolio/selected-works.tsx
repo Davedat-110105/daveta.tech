@@ -14,35 +14,35 @@ import { ArrowUpRight, PlateImage, SectionHeader } from "./primitives";
 const PROJECTS = [
   {
     title: "Astra Labs",
-    descriptor: "Pioneer telemetry platform",
+    descriptor: "Rocket telemetry for Astra Labs",
     image: "/assets/shot-astralab.jpg",
     href: "https://www.astralab.space",
     span: "md:col-span-7",
   },
   {
     title: "Hana IELTS",
-    descriptor: "IELTS learning platform",
+    descriptor: "IELTS practice site",
     image: "/assets/shot-hana.jpg",
     href: "https://hana-ielts.vercel.app",
     span: "md:col-span-5",
   },
   {
     title: "Greenlight",
-    descriptor: "CentennialHacks 2026, 3rd place",
+    descriptor: "3rd place at CentennialHacks 2026",
     image: "/assets/shot-greenlight.jpg",
     href: "https://github.com/naik26m3/centennialhacks2026",
     span: "md:col-span-6",
   },
   {
     title: "SuperWeb",
-    descriptor: "OpenAI WebMCP Challenge",
+    descriptor: "Built for OpenAI's WebMCP Challenge",
     image: "/assets/shot-superweb.webp",
     href: "https://webmcp-superweb.vercel.app",
     span: "md:col-span-6",
   },
   {
     title: "MCP Platform",
-    descriptor: "Railway-hosted agent data gateway",
+    descriptor: "Public MCP server running on Railway",
     image: "/assets/shot-mcp-live-docs.webp",
     href: "https://gateway-production-c71a.up.railway.app/docs",
     span: "md:col-span-12",
@@ -55,9 +55,9 @@ export function SelectedWorks() {
       <div className="mx-auto max-w-[1200px] px-6 md:px-10 lg:px-16">
         <SectionHeader
           eyebrow="Selected Work"
-          lead="Featured"
-          accent="projects"
-          subtext="Systems I can explain from the inside, from the problem to the deploy that runs it."
+          lead="A few things"
+          accent="I built"
+          subtext="I wrote the code, worked on the deployments, and know where the rough edges are."
           viewAll={{
             label: "View all work",
             href: "https://github.com/Davedat-110105",
