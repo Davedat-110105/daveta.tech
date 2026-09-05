@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { ArrowUpRight, PlateImage, SectionHeader } from "./primitives";
 
 /**
- * The four flagship builds. Swap a card by editing one entry: `image` points
+ * The five flagship builds. Swap a card by editing one entry: `image` points
  * at `public/assets/…` and falls back to a labelled plate while the file is
  * missing, so a slot waiting on a screenshot reads as reserved.
  */
@@ -40,10 +40,18 @@ const PROJECTS = [
     href: "https://webmcp-superweb.vercel.app",
     span: "md:col-span-6",
   },
+  {
+    title: "MCP Platform",
+    descriptor: "Railway-hosted agent data gateway",
+    image: "/assets/shot-mcp-platform.webp",
+    href: "https://gateway-production-c71a.up.railway.app/docs",
+    span: "md:col-span-12",
+  },
 ];
 
 const HALFTONE = {
-  backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
+  backgroundImage:
+    "radial-gradient(circle, hsl(var(--bg)) 1px, transparent 1px)",
   backgroundSize: "4px 4px",
 };
 
