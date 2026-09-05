@@ -1,0 +1,261 @@
+"use client";
+
+import Image from "next/image";
+import * as React from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { AnimatePresence, motion } from "motion/react";
+
+import { cn } from "@/lib/utils";
+
+import { ArrowUpRight, PlateImage, RingLink } from "./primitives";
+
+/**
+ * Off-brief photography: rocketry builds, the rack, campus sessions. Each
+ * `image` is a slot under `public/assets/`; a missing file renders as a
+ * labelled plate until the photo lands.
+ */
+const ITEMS = [
+  {
+    image: "/assets/seneca-hackathon/seneca-hackathon-threshold-team.jpeg",
+    label: "Seneca Hackathon, Project Threshold",
+    width: 1600,
+    height: 1200,
+    rotate: -4,
+  },
+  {
+    image: "/assets/uoft-hackathon/UofT-fintech-summit-presentation.jpg",
+    label: "Rotman FinTech Summit",
+    width: 2000,
+    height: 1500,
+    rotate: 3,
+  },
+  {
+    image: "/assets/centennial-hackathon/field-award-certificates.jpg",
+    label: "CentennialHacks, certificates",
+    width: 1517,
+    height: 1014,
+    rotate: -2,
+  },
+  {
+    image: "/assets/atmosphere-community.jpeg",
+    label: "Community night",
+    width: 2000,
+    height: 1334,
+    rotate: 4,
+  },
+  {
+    image: "/assets/av-club/59475abd-d23f-47d5-a917-93747495b867.jpg",
+    label: "AV Club",
+    width: 3840,
+    height: 5120,
+    rotate: -3,
+  },
+  {
+    image: "/assets/uoft-hackathon/UofT-fintech-summit-team.jpg",
+    label: "Summit, after the pitch",
+    width: 2000,
+    height: 1528,
+    rotate: 2,
+  },
+];
+
+function Card({
+  image,
+  label,
+  rotate,
+  onOpen,
+}: {
+  image: string;
+  label: string;
+  rotate: number;
+  onOpen: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      style={{ rotate: `${rotate}deg` }}
+      className="group block w-full max-w-[320px] cursor-pointer"
+    >
+      <PlateImage
+        src={image}
+        alt={label}
+        label={label}
+        sizes="(min-width: 640px) 320px, 45vw"
+        className="aspect-square w-full rounded-2xl border border-[hsl(var(--stroke))] object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+        plateClassName="rounded-2xl"
+      />
+    </button>
+  );
+}
+
+export function Explorations() {
+  const sectionRef = React.useRef<HTMLDivElement>(null);
+  const pinRef = React.useRef<HTMLDivElement>(null);
+  const col1Ref = React.useRef<HTMLDivElement>(null);
+  const col2Ref = React.useRef<HTMLDivElement>(null);
+  const [active, setActive] = React.useState<string | null>(null);
+  const activeItem = ITEMS.find((item) => item.image === active);
+
+  React.useEffect(() => {
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduce) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: "top top",
+        end: "bottom bottom",
+        pin: pinRef.current,
+        pinSpacing: false,
+      });
+      const scrub = (yPercent: number) => ({
+        yPercent,
+        ease: "none" as const,
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1,
+        },
+      });
+      gsap.to(col1Ref.current, scrub(-10));
+      gsap.to(col2Ref.current, scrub(-26));
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  React.useEffect(() => {
+    if (!active) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setActive(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [active]);
+
+  return (
+    <section
+      ref={sectionRef}
+      id="explorations"
+      className="relative min-h-[300vh] overflow-clip bg-[hsl(var(--bg))]"
+    >
+      <div
+        ref={pinRef}
+        className="pointer-events-none relative z-10 flex h-svh items-center justify-center"
+      >
+        <div className="px-6 text-center">
+          <div className="flex items-center justify-center gap-3">
+            <span className="h-px w-8 bg-[hsl(var(--stroke))]" />
+            <span className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--muted))]">
+              Off the clock
+            </span>
+            <span className="h-px w-8 bg-[hsl(var(--stroke))]" />
+          </div>
+          <h2 className="mt-5 text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl">
+            Behind the{" "}
+            <span className="font-display italic font-normal">builds</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-sm text-sm text-[hsl(var(--muted))]">
+            Rocketry hardware, the rack that serves half of this list, and the
+            rooms the work actually happens in.
+          </p>
+          <div className="pointer-events-auto mt-7 flex justify-center">
+            <RingLink
+              href="https://github.com/Davedat-110105"
+              target="_blank"
+              innerClassName="bg-[hsl(var(--surface))] px-5 py-2.5 text-sm text-[hsl(var(--text))] backdrop-blur-md"
+            >
+              GitHub
+              <ArrowUpRight className="size-3.5 rtl:-scale-x-100" />
+            </RingLink>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute inset-0 z-20">
+        <div className="mx-auto grid h-full max-w-[1400px] grid-cols-2 gap-12 px-6 md:gap-40">
+          <div
+            ref={col1Ref}
+            className="flex flex-col items-center gap-[28vh] pt-[36vh]"
+          >
+            {ITEMS.slice(0, 3).map((item) => (
+              <Card
+                key={item.image}
+                image={item.image}
+                label={item.label}
+                rotate={item.rotate}
+                onOpen={() => setActive(item.image)}
+              />
+            ))}
+          </div>
+          <div
+            ref={col2Ref}
+            className="flex flex-col items-center gap-[28vh] pt-[64vh]"
+          >
+            {ITEMS.slice(3, 6).map((item) => (
+              <Card
+                key={item.image}
+                image={item.image}
+                label={item.label}
+                rotate={item.rotate}
+                onOpen={() => setActive(item.image)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {activeItem ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Exploration preview"
+            onClick={() => setActive(null)}
+            className={cn(
+              "fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6",
+            )}
+          >
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => setActive(null)}
+              className="absolute end-6 top-6 flex size-10 items-center justify-center rounded-full border border-white/15 text-white/80 transition-colors hover:text-white"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                aria-hidden="true"
+                className="size-4"
+              >
+                <path d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </button>
+            <Image
+              src={activeItem.image}
+              alt=""
+              width={activeItem.width}
+              height={activeItem.height}
+              sizes="90vw"
+              onClick={(e) => e.stopPropagation()}
+              className="h-auto max-h-[85vh] w-auto max-w-[90vw] rounded-2xl object-contain"
+            />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </section>
+  );
+}

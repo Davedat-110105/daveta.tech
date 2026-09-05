@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
+
   // The apex is canonical. Anyone who types www gets a permanent redirect
   // rather than a second indexable copy of the site.
   async redirects() {
