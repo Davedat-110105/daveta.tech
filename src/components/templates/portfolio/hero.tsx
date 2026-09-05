@@ -188,11 +188,11 @@ export function Hero({ start = true }: { start?: boolean }) {
           Dave Ta
         </h1>
         <p className="blur-in mb-4 text-lg text-[hsl(var(--text))] opacity-0 sm:text-xl">
-          I learn systems by running them.
+          I build software. I keep it running too.
         </p>
         <p className="blur-in mb-12 max-w-lg text-sm text-[hsl(var(--muted))] opacity-0 md:text-base">
-          Rocketry telemetry, an IELTS platform, a public MCP server &mdash;
-          and the rack in Toronto that serves half the sites further down.
+          Right now I&apos;m working on rocket telemetry, an IELTS site, and a
+          public MCP server. I run several other sites from a rack in Toronto.
         </p>
         <div className="blur-in inline-flex flex-wrap items-center justify-center gap-4 opacity-0">
           <RingLink
