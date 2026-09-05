@@ -31,7 +31,14 @@ const PROJECTS = [
     descriptor: "CentennialHacks 2026, 3rd place",
     image: "/assets/shot-greenlight.jpg",
     href: "https://github.com/naik26m3/centennialhacks2026",
-    span: "md:col-span-12",
+    span: "md:col-span-6",
+  },
+  {
+    title: "SuperWeb",
+    descriptor: "OpenAI WebMCP Challenge",
+    image: "/assets/shot-superweb.webp",
+    href: "https://webmcp-superweb.vercel.app",
+    span: "md:col-span-6",
   },
 ];
 
