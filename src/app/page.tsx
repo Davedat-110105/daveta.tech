@@ -1,25 +1,11 @@
-import { About } from "@/components/About";
-import { Contact } from "@/components/Contact";
-import { DeployRail } from "@/components/DeployRail";
-import { Hero } from "@/components/Hero";
-import { Nav } from "@/components/Nav";
-import { Record } from "@/components/Record";
-import { ScrollProgress } from "@/components/ScrollProgress";
-import { Work } from "@/components/Work";
+import Portfolio from "@/components/templates/portfolio/portfolio";
 
+/*
+ * The page is the hirael portfolio template (MIT, Mohammad Shehadeh) with
+ * every content slot replaced by real work. Layout, motion and palette are
+ * unchanged from upstream; see the LICENSE and ATTRIBUTION.md that sit beside
+ * the components in src/components/templates/portfolio/.
+ */
 export default function HomePage() {
-  return (
-    <div className="relative min-h-screen overflow-x-hidden bg-bg text-fg">
-      <ScrollProgress />
-      <Nav />
-      <main>
-        <Hero />
-        <Work />
-        <DeployRail />
-        <Record />
-        <About />
-        <Contact />
-      </main>
-    </div>
-  );
+  return <Portfolio />;
 }

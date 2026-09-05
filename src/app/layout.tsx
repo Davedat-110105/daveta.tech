@@ -83,7 +83,7 @@ export default function RootLayout({
         <noscript>
           {/* Scroll reveals are progressive enhancement — without scripts the
               content must simply be there. */}
-          <style>{`[data-reveal]{opacity:1!important;transform:none!important;filter:none!important}`}</style>
+          <style>{`[data-reveal],.name-reveal,.blur-in{opacity:1!important;transform:none!important;filter:none!important}`}</style>
         </noscript>
         <script
           type="application/ld+json"

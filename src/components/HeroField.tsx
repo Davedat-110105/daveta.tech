@@ -5,9 +5,10 @@ import { useEffect, useRef } from "react";
 /**
  * The hero background: a single fullscreen quad running one fragment shader.
  *
- * Everything on screen — nebula, three parallax star layers, the signal traces
- * and the packets riding them — is generated per-pixel on the GPU. No textures,
- * no geometry, no dependencies.
+ * Everything on screen — nebula, three parallax star layers and the measurement
+ * grid — is generated per-pixel on the GPU. No textures, no geometry, no
+ * dependencies. This shader also drew six animated signal traces; they were
+ * removed, since sweeping curves across the hero copy read as decoration.
  *
  * Cost control, in order of importance:
  *   · device pixel ratio is capped at 1.5 (a 4K hero at dpr 3 is 25M pixels of
@@ -30,10 +31,9 @@ uniform vec2  uRes;
 uniform float uTime;
 uniform vec2  uPointer;
 
-const vec3 BG      = vec3(0.043, 0.043, 0.047); // #0b0b0c
-const vec3 ACCENT  = vec3(1.000, 0.478, 0.271); // #ff7a45
-const vec3 NEB_A   = vec3(0.110, 0.104, 0.106); // neutral graphite
-const vec3 NEB_B   = vec3(0.290, 0.161, 0.106); // dim ember
+const vec3 BG      = vec3(0.039, 0.039, 0.039); // #0a0a0a, matches --bg
+const vec3 NEB_A   = vec3(0.165, 0.158, 0.162); // neutral graphite
+const vec3 NEB_B   = vec3(0.148, 0.235, 0.318); // dim steel
 
 float hash21(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -68,7 +68,7 @@ float starLayer(vec2 uv, float density, float seed, float t) {
   vec2 f  = fract(g) - 0.5;
 
   float h  = hash21(id + seed);
-  float on = step(0.88, h);
+  float on = step(0.875, h);
 
   vec2 off = (vec2(hash21(id + seed + 1.7), hash21(id + seed + 3.1)) - 0.5) * 0.72;
   float d  = length(f - off);
@@ -79,17 +79,6 @@ float starLayer(vec2 uv, float density, float seed, float t) {
   float halo = smoothstep(0.115, 0.0, d) * 0.075;
 
   return on * (core + halo) * bright * twinkle;
-}
-
-/* Height of trace i at horizontal position x, including the cursor deflection. */
-float traceY(float x, float base, float amp, float freq, float speed, float phase, float slack) {
-  float y = base
-    + sin(x * freq * 6.2831 + uTime * speed + phase) * amp
-    + sin(x * 19.5 + uTime * speed * 0.62 + phase * 2.0) * amp * 0.3;
-  float dx = x - uPointer.x;
-  y -= exp(-dx * dx / 0.0055) * 0.062 * slack;
-  y += (uPointer.y - 0.5) * 0.085 * slack;
-  return y;
 }
 
 void main() {
@@ -110,9 +99,9 @@ void main() {
     np += (uPointer - 0.5) * 0.09;
     float warp = vnoise(np * 1.6);
     float n = fbm(np + warp * 0.7);
-    n = smoothstep(0.38, 0.88, n) * nmask;
+    n = smoothstep(0.30, 0.82, n) * nmask;
     vec3 neb = mix(NEB_A, NEB_B, smoothstep(0.25, 0.85, warp));
-    col += neb * n * 1.05;
+    col += neb * n * 1.1;
   }
 
   /* ---- stars, three parallax shells -------------------------------- */
@@ -122,36 +111,12 @@ void main() {
   col += vec3(0.93, 0.91, 0.88) *
          starLayer(sky + drift * 0.022 + vec2(uTime * 0.0065, 0.0), 16.0, 27.0, uTime) * 0.85;
   col += vec3(1.0) *
-         starLayer(sky + drift * 0.040 + vec2(uTime * 0.0105, 0.0), 9.5, 71.0, uTime) * 1.10;
+         starLayer(sky + drift * 0.040 + vec2(uTime * 0.0105, 0.0), 9.5, 71.0, uTime) * 1.05;
 
   /* ---- measurement grid -------------------------------------------- */
   vec2 cell = abs(fract(sky * 11.0) - 0.5);
   float grid = smoothstep(0.492, 0.5, max(cell.x, cell.y));
-  col += vec3(0.55, 0.53, 0.50) * grid * 0.030;
-
-  /* ---- signal traces + packets ------------------------------------- */
-  for (int i = 0; i < 6; i++) {
-    float fi    = float(i);
-    float base  = 0.24 + fi * 0.115;
-    float amp   = 0.014 + mod(fi * 37.0, 30.0) * 0.00055;
-    float freq  = 0.72 + mod(fi * 13.0, 9.0) / 6.2;
-    float speed = 0.52 + mod(fi * 7.0, 11.0) * 0.055;
-    float phase = fi * 1.7;
-    float slack = 1.0 - fi / 7.5;
-
-    float ty = traceY(uv.x, base, amp, freq, speed, phase, slack);
-    float dist = abs(uv.y - ty);
-    float line = 0.00085 / (dist + 0.0007);
-    float fade = 0.16 + 0.52 * (1.0 - fi / 6.0);
-    col += ACCENT * line * fade;
-
-    // A packet riding this trace.
-    float u  = fract(uTime * (0.036 + mod(fi * 29.0, 17.0) * 0.0022) + fi * 0.37);
-    float py = traceY(u, base, amp, freq, speed, phase, slack);
-    float pd = length(vec2((uv.x - u) * aspect, uv.y - py));
-    col += ACCENT * (0.0016 / (pd + 0.0022)) * 0.55;
-    col += vec3(1.0) * smoothstep(0.0035, 0.0, pd) * 0.75;
-  }
+  col += vec3(0.58, 0.57, 0.55) * grid * 0.035;
 
   /* ---- settle into the page ---------------------------------------- */
   float vig = smoothstep(1.15, 0.28, length((uv - vec2(0.5, 0.34)) * vec2(1.0, 1.25)));
