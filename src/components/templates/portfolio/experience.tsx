@@ -64,10 +64,10 @@ const CREDENTIALS = [
 ];
 
 const RECORD = [
-  { year: "2026", name: "CentennialHacks", result: "3rd place" },
-  { year: "2025", name: "Seneca Software Engineering Competition", result: "1st place" },
-  { year: "2025", name: "Seneca Hackathon", result: "1st place" },
-  { year: "2025", name: "Rotman Commerce FinTech, UFD", result: "1st place" },
+  { date: "Aug 2026", name: "CentennialHacks", result: "3rd place" },
+  { date: "May 2026", name: "Seneca Hackathon", result: "1st place" },
+  { date: "Apr 2026", name: "Rotman Commerce FinTech, UFD", result: "1st place" },
+  { date: "Dec 2025", name: "Seneca Software Engineering Competition", result: "1st place" },
 ];
 
 function RoleRow({ role, isFirst }: { role: Role; isFirst: boolean }) {
@@ -203,12 +203,12 @@ export function Experience() {
             <ul className="mt-5 flex flex-col gap-3">
               {RECORD.map((entry) => (
                 <li
-                  key={`${entry.year}-${entry.name}`}
+                  key={`${entry.date}-${entry.name}`}
                   className="flex items-baseline justify-between gap-4 border-b border-[hsl(var(--stroke))] pb-3 text-sm last:border-b-0"
                 >
                   <span className="min-w-0 flex-1 truncate text-[hsl(var(--text))]/90">
                     <span className="me-3 tabular-nums text-[hsl(var(--muted))]">
-                      {entry.year}
+                      {entry.date}
                     </span>
                     {entry.name}
                   </span>
