@@ -25,6 +25,7 @@ type Role = {
   domain: string;
   website?: string;
   image?: string;
+  imageClassName?: string;
   description: string[];
 };
 
@@ -49,6 +50,9 @@ const ROLES: Role[] = [
     position: "Technical Support Intern",
     location: "Remote",
     domain: "Web & automation",
+    website: "brandglowup.com",
+    image: "/assets/brand-glow-up-logo.png",
+    imageClassName: "object-contain p-12 invert sm:p-20",
     description: [
       "Website and automation support, technical audits, and remote troubleshooting against client sites I did not write and had to read first.",
       "Most of the job was reproducing a problem accurately before touching anything.",
@@ -88,7 +92,11 @@ function RoleRow({ role, isFirst }: { role: Role; isFirst: boolean }) {
           alt=""
           label={role.org}
           sizes="(min-width: 1200px) 1072px, 100vw"
-          className="absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-15"
+          className={cn(
+            "absolute inset-0 size-full opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-15",
+            role.imageClassName && "group-hover:opacity-30",
+          )}
+          imageClassName={role.imageClassName}
           plateClassName="opacity-0"
         />
       ) : null}

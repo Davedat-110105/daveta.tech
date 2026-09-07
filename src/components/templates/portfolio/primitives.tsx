@@ -198,6 +198,7 @@ export function PlateImage({
   label,
   sizes = "100vw",
   className,
+  imageClassName,
   plateClassName,
 }: {
   src: string;
@@ -205,6 +206,7 @@ export function PlateImage({
   label: string;
   sizes?: string;
   className?: string;
+  imageClassName?: string;
   plateClassName?: string;
 }) {
   const [failed, setFailed] = React.useState(false);
@@ -240,7 +242,7 @@ export function PlateImage({
         fill
         sizes={sizes}
         onError={() => setFailed(true)}
-        className="object-cover"
+        className={cn("object-cover", imageClassName)}
       />
     </span>
   );
