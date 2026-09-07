@@ -4,7 +4,6 @@ import Image from "next/image";
 import * as React from "react";
 import gsap from "gsap";
 
-import { HeroField } from "@/components/HeroField";
 import { cn } from "@/lib/utils";
 
 import { ArrowUpRight, onAnchorClick, RingLink } from "./primitives";
@@ -157,58 +156,55 @@ export function Hero({ start = true }: { start?: boolean }) {
     >
       <Navbar />
 
-      {/*
-       * Two layers. The still carries the nebula body and depth — a diffuse
-       * field, so the upscale to retina costs nothing visible. The shader
-       * screens over it for the stars, traces and pointer parallax, which do
-       * need native resolution. `isolate` keeps the blend inside this stack.
-       */}
-      {/*
-       * z-0, not -z-10. Neither this section nor the portfolio root creates a
-       * stacking context, so a negative z-index escapes both and paints behind
-       * the root's opaque background — invisible. The copy below is already
-       * `relative z-10`, so z-0 gives the right order without the vanishing act.
-      */}
-      <div className="absolute inset-0 z-0 isolate">
+      <div className="absolute inset-0 z-0">
         <Image
           src="/assets/hero-field.webp"
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover"
+          className="object-cover saturate-75"
         />
-        <HeroField className="absolute inset-0 size-full mix-blend-screen" />
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[hsl(var(--bg))] to-transparent" />
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[hsl(var(--bg))] via-[hsl(var(--bg))]/35 to-transparent" />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center px-6 text-center">
-        <h1 className="name-reveal mb-6 font-display text-6xl italic leading-[0.9] tracking-tight opacity-0 md:text-8xl lg:text-9xl">
-          Dave Ta
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-10 mx-auto grid w-full max-w-[1600px] grid-cols-12 divide-x divide-white/10 border-x border-white/10"
+      >
+        <span className="col-span-1" />
+        <span className="col-span-3" />
+        <span className="col-span-4" />
+        <span className="col-span-3" />
+        <span className="col-span-1" />
+      </div>
+
+      <div className="relative z-20 flex max-w-5xl flex-col items-center px-6 text-center text-white">
+        <p className="blur-in mb-5 text-xs uppercase tracking-[0.22em] text-white/65 opacity-0 sm:text-sm">
+          Dave Ta · Software engineer · Toronto
+        </p>
+        <h1 className="name-reveal max-w-4xl font-display text-5xl leading-[0.92] tracking-[-0.035em] opacity-0 sm:text-6xl md:text-7xl lg:text-8xl">
+          I build software that stays running.
         </h1>
-        <p className="blur-in mb-4 text-lg text-[hsl(var(--text))] opacity-0 sm:text-xl">
-          I build software. I keep it running too.
+        <p className="blur-in mb-10 mt-7 max-w-2xl text-sm leading-6 text-white/70 opacity-0 sm:text-base sm:leading-7">
+          Rocket telemetry, learning platforms, public MCP services, and the
+          infrastructure behind them.
         </p>
-        <p className="blur-in mb-12 max-w-lg text-sm text-[hsl(var(--muted))] opacity-0 md:text-base">
-          Right now I&apos;m working on rocket telemetry, an IELTS site, and a
-          public MCP server. I run several other sites from a rack in Toronto.
-        </p>
-        <div className="blur-in inline-flex flex-wrap items-center justify-center gap-4 opacity-0">
-          <RingLink
+        <div className="blur-in opacity-0">
+          <a
             href="#work"
-            outerClassName="transition-transform duration-300 hover:scale-105"
-            innerClassName="bg-[hsl(var(--text))] px-7 py-3.5 text-sm text-[hsl(var(--bg))] group-hover:bg-[hsl(var(--bg))] group-hover:text-[hsl(var(--text))]"
+            onClick={(e) => onAnchorClick(e, "#work")}
+            className="group inline-flex items-stretch gap-px rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           >
-            See Works
-          </RingLink>
-          <RingLink
-            href="#contact"
-            outerClassName="transition-transform duration-300 hover:scale-105"
-            innerClassName="border-2 border-[hsl(var(--stroke))] bg-[hsl(var(--bg))] px-7 py-3.5 text-sm text-[hsl(var(--text))] group-hover:border-transparent"
-          >
-            Reach out
-          </RingLink>
+            <span className="flex items-center rounded-full bg-white px-6 text-sm font-medium text-black transition-colors duration-300 group-hover:bg-[#16212b] group-hover:text-white">
+              See my work
+            </span>
+            <span className="relative flex size-12 items-center justify-center overflow-hidden rounded-full bg-white text-black transition-colors duration-300 group-hover:bg-[#16212b] group-hover:text-white">
+              <ArrowUpRight className="absolute size-4 transition-transform duration-500 ease-out group-hover:translate-x-8 group-hover:-translate-y-8 rtl:-scale-x-100" />
+              <ArrowUpRight className="absolute size-4 -translate-x-8 translate-y-8 transition-transform duration-500 ease-out group-hover:translate-x-0 group-hover:translate-y-0 rtl:-scale-x-100" />
+            </span>
+          </a>
         </div>
       </div>
 
