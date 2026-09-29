@@ -10,7 +10,16 @@ export const PORTFOLIO_STYLES = `
   --muted: 0 0% 53%;
   --stroke: 0 0% 12%;
   --accent: 0 0% 96%;
+  /* #89AACC, the light end of the accent gradient. The one colour that shows
+     at rest, reserved for first-place marks. 8:1 on --bg. */
+  --signal: 210 40% 67%;
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+/* The scoped --accent is bare HSL channels, which made the global
+   outline: var(--accent) invalid and left keyboard focus with no ring. */
+[data-slot="portfolio"] :focus-visible {
+  outline: 2px solid hsl(var(--text));
+  outline-offset: 4px;
 }
 [data-slot="portfolio"] .font-display {
   font-family: var(--font-instrument-serif), ui-serif, Georgia, serif;
@@ -30,9 +39,6 @@ export const PORTFOLIO_STYLES = `
   background-size: 200% 100%;
   animation: pf-gradient-shift 6s ease infinite;
 }
-[data-slot="portfolio"] .animate-scroll-down {
-  animation: pf-scroll-down 1.5s ease-in-out infinite;
-}
 [data-slot="portfolio"] .animate-marquee {
   animation: pf-marquee 60s linear infinite;
 }
@@ -42,10 +48,6 @@ export const PORTFOLIO_STYLES = `
 }
 [data-slot="portfolio"] .animate-role-fade-in {
   animation: pf-role-fade-in 0.4s ease-out both;
-}
-@keyframes pf-scroll-down {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(200%); }
 }
 @keyframes pf-marquee {
   0% { transform: translateX(0); }
@@ -61,7 +63,6 @@ export const PORTFOLIO_STYLES = `
   100% { background-position: 0% 50%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-slot="portfolio"] .animate-scroll-down,
   [data-slot="portfolio"] .animate-marquee,
   [data-slot="portfolio"] .accent-gradient-animated {
     animation: none;

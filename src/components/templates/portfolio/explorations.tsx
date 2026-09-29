@@ -6,19 +6,18 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimatePresence, motion } from "motion/react";
 
-import { cn } from "@/lib/utils";
-
-import { ArrowUpRight, PlateImage, RingLink } from "./primitives";
-
 /**
- * Off-brief photography: rocketry builds, the rack, campus sessions. Each
- * `image` is a slot under `public/assets/`; a missing file renders as a
- * labelled plate until the photo lands.
+ * Photographs from the days around the work, drifting past a heading that
+ * holds still. The template did this with a 300vh GSAP pin that left a long
+ * empty scroll once the photos ran out and covered the heading on phones.
+ * Here the heading is CSS-sticky behind two columns that set the section's
+ * height themselves, so the section ends when the last photo leaves. Phones
+ * get the same tilted cards in a plain grid under the heading.
  */
 const ITEMS = [
   {
     image: "/assets/seneca-hackathon/seneca-hackathon-threshold-team.jpeg",
-    label: "Seneca Hackathon, Project Threshold",
+    label: "Seneca Energy Hackathon, Threshold",
     width: 1600,
     height: 1200,
     rotate: -4,
@@ -60,96 +59,111 @@ const ITEMS = [
   },
 ];
 
+type Item = (typeof ITEMS)[number];
+
 function Card({
-  image,
-  label,
-  rotate,
+  item,
   onOpen,
 }: {
-  image: string;
-  label: string;
-  rotate: number;
-  onOpen: () => void;
+  item: Item;
+  onOpen: (trigger: HTMLButtonElement) => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      style={{ rotate: `${rotate}deg` }}
-      className="group block w-full max-w-[320px] cursor-pointer"
+    <figure
+      style={{ "--tilt": `${item.rotate}deg` } as React.CSSProperties}
+      className="group w-full max-w-[320px] rotate-[var(--tilt)] transition-transform duration-500 ease-out focus-within:rotate-0 hover:-translate-y-1.5 hover:rotate-0"
     >
-      <PlateImage
-        src={image}
-        alt={label}
-        label={label}
-        sizes="(min-width: 640px) 320px, 45vw"
-        className="aspect-square w-full rounded-2xl border border-[hsl(var(--stroke))] object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-        plateClassName="rounded-2xl"
-      />
-    </button>
+      <button
+        type="button"
+        onClick={(e) => onOpen(e.currentTarget)}
+        aria-label={`Open photo: ${item.label}`}
+        className="relative block aspect-square w-full cursor-zoom-in overflow-hidden rounded-2xl border border-[hsl(var(--stroke))] bg-[hsl(var(--surface))] shadow-[0_18px_40px_-18px_rgb(0_0_0/0.8)] transition-colors duration-300 group-hover:border-white/25"
+      >
+        <Image
+          src={item.image}
+          alt=""
+          fill
+          sizes="(min-width: 768px) 320px, 45vw"
+          className="object-cover"
+        />
+      </button>
+      {/* Handwritten, in the same script as the opening "hello". */}
+      <figcaption className="font-script mt-2.5 text-center text-lg leading-tight text-[hsl(var(--muted))] transition-colors duration-300 group-hover:text-[hsl(var(--text))] md:text-xl">
+        {item.label}
+      </figcaption>
+    </figure>
   );
 }
 
 export function Explorations() {
-  const sectionRef = React.useRef<HTMLDivElement>(null);
-  const pinRef = React.useRef<HTMLDivElement>(null);
+  const sectionRef = React.useRef<HTMLElement>(null);
   const col1Ref = React.useRef<HTMLDivElement>(null);
   const col2Ref = React.useRef<HTMLDivElement>(null);
-  const [active, setActive] = React.useState<string | null>(null);
-  const activeItem = ITEMS.find((item) => item.image === active);
+  const [active, setActive] = React.useState<Item | null>(null);
+  const triggerRef = React.useRef<HTMLButtonElement | null>(null);
+  const closeRef = React.useRef<HTMLButtonElement>(null);
 
+  // Two columns drifting at slightly different speeds over the sticky
+  // heading. Desktop widths only, and never under reduced motion.
   React.useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 768px)").matches;
     const reduce = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    if (reduce) return;
+    if (!desktop || reduce) return;
 
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top top",
-        end: "bottom bottom",
-        pin: pinRef.current,
-        pinSpacing: false,
-      });
-      const scrub = (yPercent: number) => ({
-        yPercent,
-        ease: "none" as const,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1,
-        },
-      });
-      gsap.to(col1Ref.current, scrub(-10));
-      gsap.to(col2Ref.current, scrub(-26));
+      const drift = (target: HTMLElement | null, from: number, to: number) =>
+        gsap.fromTo(
+          target,
+          { yPercent: from },
+          {
+            yPercent: to,
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1,
+            },
+          },
+        );
+      drift(col1Ref.current, 4, -2);
+      drift(col2Ref.current, 12, -6);
     }, sectionRef);
-
     return () => ctx.revert();
+  }, []);
+
+  const open = (item: Item, trigger: HTMLButtonElement) => {
+    triggerRef.current = trigger;
+    setActive(item);
+  };
+
+  const close = React.useCallback(() => {
+    setActive(null);
+    // Hand focus back to the photo that opened the preview.
+    triggerRef.current?.focus();
   }, []);
 
   React.useEffect(() => {
     if (!active) return;
+    closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setActive(null);
+      if (e.key === "Escape") close();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [active]);
+  }, [active, close]);
 
   return (
     <section
       ref={sectionRef}
       id="explorations"
-      className="relative min-h-[300vh] overflow-clip bg-[hsl(var(--bg))]"
+      className="relative bg-[hsl(var(--bg))] py-16 md:py-0"
     >
-      <div
-        ref={pinRef}
-        className="pointer-events-none relative z-10 flex h-svh items-center justify-center"
-      >
-        <div className="px-6 text-center">
+      <div className="pointer-events-none z-0 flex items-center justify-center px-6 md:sticky md:top-0 md:h-svh">
+        <div className="text-center">
           <div className="flex items-center justify-center gap-3">
             <span className="h-px w-8 bg-[hsl(var(--stroke))]" />
             <span className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--muted))]">
@@ -162,57 +176,32 @@ export function Explorations() {
             <span className="font-display italic font-normal">builds</span>
           </h2>
           <p className="mx-auto mt-4 max-w-sm text-sm text-[hsl(var(--muted))]">
-            Rocket hardware, the rack that serves half the sites above, and
-            the rooms where the work happens.
+            Photos from hackathon stages and campus AV shifts.
           </p>
-          <div className="pointer-events-auto mt-7 flex justify-center">
-            <RingLink
-              href="https://github.com/Davedat-110105"
-              target="_blank"
-              innerClassName="bg-[hsl(var(--surface))] px-5 py-2.5 text-sm text-[hsl(var(--text))] backdrop-blur-md"
-            >
-              GitHub
-              <ArrowUpRight className="size-3.5 rtl:-scale-x-100" />
-            </RingLink>
-          </div>
         </div>
       </div>
 
-      <div className="absolute inset-0 z-20">
-        <div className="mx-auto grid h-full max-w-[1400px] grid-cols-2 gap-12 px-6 md:gap-40">
-          <div
-            ref={col1Ref}
-            className="flex flex-col items-center gap-[28vh] pt-[36vh]"
-          >
-            {ITEMS.slice(0, 3).map((item) => (
-              <Card
-                key={item.image}
-                image={item.image}
-                label={item.label}
-                rotate={item.rotate}
-                onOpen={() => setActive(item.image)}
-              />
-            ))}
-          </div>
-          <div
-            ref={col2Ref}
-            className="flex flex-col items-center gap-[28vh] pt-[64vh]"
-          >
-            {ITEMS.slice(3, 6).map((item) => (
-              <Card
-                key={item.image}
-                image={item.image}
-                label={item.label}
-                rotate={item.rotate}
-                onOpen={() => setActive(item.image)}
-              />
-            ))}
-          </div>
+      <div className="relative z-10 mx-auto mt-10 grid max-w-[1400px] grid-cols-2 gap-x-5 px-6 md:-mt-[100svh] md:gap-x-40 md:pb-[8svh]">
+        <div
+          ref={col1Ref}
+          className="flex flex-col items-center gap-10 md:gap-[26svh] md:pt-[40svh]"
+        >
+          {ITEMS.slice(0, 3).map((item) => (
+            <Card key={item.image} item={item} onOpen={(t) => open(item, t)} />
+          ))}
+        </div>
+        <div
+          ref={col2Ref}
+          className="flex flex-col items-center gap-10 pt-16 md:gap-[26svh] md:pt-[68svh]"
+        >
+          {ITEMS.slice(3, 6).map((item) => (
+            <Card key={item.image} item={item} onOpen={(t) => open(item, t)} />
+          ))}
         </div>
       </div>
 
       <AnimatePresence>
-        {activeItem ? (
+        {active ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -220,16 +209,15 @@ export function Explorations() {
             transition={{ duration: 0.25 }}
             role="dialog"
             aria-modal="true"
-            aria-label="Exploration preview"
-            onClick={() => setActive(null)}
-            className={cn(
-              "fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6",
-            )}
+            aria-label={active.label}
+            onClick={close}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-black/90 p-6"
           >
             <button
+              ref={closeRef}
               type="button"
-              aria-label="Close"
-              onClick={() => setActive(null)}
+              aria-label="Close photo"
+              onClick={close}
               className="absolute end-6 top-6 flex size-10 items-center justify-center rounded-full border border-white/15 text-white/80 transition-colors hover:text-white"
             >
               <svg
@@ -245,14 +233,15 @@ export function Explorations() {
               </svg>
             </button>
             <Image
-              src={activeItem.image}
-              alt=""
-              width={activeItem.width}
-              height={activeItem.height}
+              src={active.image}
+              alt={active.label}
+              width={active.width}
+              height={active.height}
               sizes="90vw"
               onClick={(e) => e.stopPropagation()}
-              className="h-auto max-h-[85vh] w-auto max-w-[90vw] rounded-2xl object-contain"
+              className="h-auto max-h-[80vh] w-auto max-w-[90vw] rounded-2xl object-contain"
             />
+            <p className="font-script text-xl text-white/80">{active.label}</p>
           </motion.div>
         ) : null}
       </AnimatePresence>

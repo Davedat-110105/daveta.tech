@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import * as React from "react";
 import {
   AnimatePresence,
@@ -10,9 +11,15 @@ import {
 } from "motion/react";
 
 import { links } from "@/data/content";
+import { HACKATHONS } from "@/data/hackathons";
 import { cn } from "@/lib/utils";
 
-import { ArrowUpRight, PlateImage, SectionHeader } from "./primitives";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  PlateImage,
+  SectionHeader,
+} from "./primitives";
 
 /*
  * Adapted from "Impact Experience" by uilayout.contact on 21st.dev
@@ -44,9 +51,10 @@ const ROLES: Role[] = [
     position: "Tech Lead",
     location: "Toronto, ON",
     domain: "Community & events",
+    image: "/assets/gdg/info-session-bean-bash.jpg",
     description: [
       "Tech lead for the GDG chapter on campus. I help plan and run the workshops and talks, and I handle the coordination that comes with them.",
-      "Started September 2026, so most of what I have done so far is planning.",
+      "Our first info session ran on September 23, 2026: 64 registrations, a panel and Q&A with Olivier Bourgeois from Google, workshops and demos, and the Bean Bash mini-game, which I hosted.",
     ],
   },
   {
@@ -97,37 +105,22 @@ const ROLES: Role[] = [
  * is no hover, the photograph sits inline as a small plate instead.
  */
 type Win = {
+  slug: string;
   date: string;
   name: string;
   rank: string;
   image?: string;
 };
 
-const RECORD: Win[] = [
-  {
-    date: "Aug 2026",
-    name: "CentennialHacks",
-    rank: "3rd",
-    image: "/assets/centennial-hackathon/field-results-hall.jpg",
-  },
-  {
-    date: "May 2026",
-    name: "Seneca Hackathon",
-    rank: "1st",
-    image: "/assets/seneca-hackathon/seneca-hackathon-threshold-third-shot.jpeg",
-  },
-  {
-    date: "Apr 2026",
-    name: "Rotman Commerce FinTech, UFD",
-    rank: "1st",
-    image: "/assets/uoft-hackathon/UofT-fintech-summit-team.jpg",
-  },
-  {
-    date: "Dec 2025",
-    name: "Seneca Software Engineering Competition",
-    rank: "1st",
-  },
-];
+// Each row opens the event's own page, /hackathons/<slug>. The row photo is
+// the first photo on that page.
+const RECORD: Win[] = HACKATHONS.map((hackathon) => ({
+  slug: hackathon.slug,
+  date: hackathon.date,
+  name: hackathon.name,
+  rank: hackathon.rank,
+  image: hackathon.photos[0]?.src,
+}));
 
 /*
  * Credentials, most recent first. Each links to the vendor's official page
@@ -314,54 +307,62 @@ function Record() {
             }}
             onMouseEnter={() => setActive(index)}
             className={cn(
-              "group grid grid-cols-[auto_1fr_auto] items-center gap-x-4 border-b border-[hsl(var(--stroke))] py-5 transition-colors duration-300 sm:gap-x-6 md:grid-cols-[7rem_1fr_auto] md:py-7",
+              "border-b border-[hsl(var(--stroke))] transition-opacity duration-300",
               active !== null && !isActive && "opacity-40",
             )}
           >
-            {/* Inline plate for touch screens; the hover card covers desktop. */}
-            <span className="relative block size-14 overflow-hidden rounded-lg bg-[hsl(var(--surface))] md:hidden">
-              {win.image ? (
-                <Image
-                  src={win.image}
-                  alt=""
-                  fill
-                  sizes="56px"
-                  className="object-cover"
-                />
-              ) : (
-                <span className="flex size-full items-center justify-center font-display text-xl italic text-[hsl(var(--muted))]">
-                  {win.rank}
-                </span>
-              )}
-            </span>
-            <span className="hidden font-data text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--muted))] tabular-nums md:block">
-              {win.date}
-            </span>
-
-            <span className="min-w-0">
-              <span className="block font-data text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--muted))] md:hidden">
+            <Link
+              href={`/hackathons/${win.slug}`}
+              onFocus={() => setActive(index)}
+              onBlur={() => setActive(null)}
+              className="group grid grid-cols-[auto_1fr_auto] items-center gap-x-4 py-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[hsl(var(--text))] sm:gap-x-6 md:grid-cols-[7rem_1fr_auto] md:py-7"
+            >
+              {/* Inline plate for touch screens; the hover card covers desktop. */}
+              <span className="relative block size-14 overflow-hidden rounded-lg bg-[hsl(var(--surface))] md:hidden">
+                {win.image ? (
+                  <Image
+                    src={win.image}
+                    alt=""
+                    fill
+                    sizes="56px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="flex size-full items-center justify-center font-display text-xl italic text-[hsl(var(--muted))]">
+                    {win.rank}
+                  </span>
+                )}
+              </span>
+              <span className="hidden font-data text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--muted))] tabular-nums md:block">
                 {win.date}
               </span>
-              <span className="block text-pretty text-lg font-medium leading-tight tracking-tight text-[hsl(var(--text))] sm:text-2xl md:text-3xl">
-                {win.name}
-              </span>
-            </span>
 
-            <span className="flex items-baseline gap-2 text-[hsl(var(--text))]">
-              <span
-                className={cn(
-                  "font-display text-5xl italic leading-none transition-colors duration-300 sm:text-6xl md:text-7xl lg:text-8xl",
-                  win.rank === "1st"
-                    ? "text-[hsl(var(--text))]"
-                    : "text-[hsl(var(--text))]/60",
-                )}
-              >
-                {win.rank}
+              <span className="min-w-0">
+                <span className="block font-data text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--muted))] md:hidden">
+                  {win.date}
+                </span>
+                <span className="flex items-center gap-2 text-pretty text-lg font-medium leading-tight tracking-tight text-[hsl(var(--text))] sm:text-2xl md:text-3xl">
+                  {win.name}
+                  <ArrowRight className="size-4 shrink-0 text-[hsl(var(--muted))] transition-transform duration-300 group-hover:translate-x-1 group-hover:text-[hsl(var(--text))] md:size-5" />
+                </span>
               </span>
-              <span className="hidden font-data text-[10px] uppercase tracking-[0.25em] text-[hsl(var(--muted))] sm:block">
-                place
+
+              <span className="flex items-baseline gap-2 text-[hsl(var(--text))]">
+                <span
+                  className={cn(
+                    "font-display text-5xl italic leading-none transition-colors duration-300 sm:text-6xl md:text-7xl lg:text-8xl",
+                    win.rank === "1st"
+                      ? "text-[hsl(var(--signal))]"
+                      : "text-[hsl(var(--text))]/60",
+                  )}
+                >
+                  {win.rank}
+                </span>
+                <span className="hidden font-data text-[10px] uppercase tracking-[0.25em] text-[hsl(var(--muted))] sm:block">
+                  place
+                </span>
               </span>
-            </span>
+            </Link>
           </motion.li>
         );
       })}
@@ -541,24 +542,34 @@ export function Experience() {
           ))}
         </div>
 
-        <div className="mt-20 md:mt-28">
-          <Kicker>Competition record</Kicker>
-          <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-            <h3 className="max-w-xl text-3xl font-medium leading-[1.05] tracking-tight sm:text-4xl lg:text-5xl">
-              Four podiums,{" "}
-              <span className="font-display italic font-normal">
-                three of them first.
-              </span>
-            </h3>
-            <p className="max-w-xs text-sm text-[hsl(var(--muted))] sm:text-base">
-              Hackathons and engineering competitions, most recent first. Hover
-              a row for a photo from the day.
-            </p>
-          </div>
-          <Record />
-        </div>
-
         <Credentials />
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The competition record as its own section, straight after Selected Work and
+ * in the nav. It used to sit under Experience, about 5,000px down the page.
+ */
+export function CompetitionRecord() {
+  return (
+    <section id="record" className="bg-[hsl(var(--bg))] py-16 md:py-24">
+      <div className="mx-auto max-w-[1200px] px-6 md:px-10 lg:px-16">
+        <Kicker>Competition record</Kicker>
+        <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <h2 className="max-w-xl text-3xl font-medium leading-[1.05] tracking-tight sm:text-4xl lg:text-5xl">
+            Four podiums,{" "}
+            <span className="font-display italic font-normal">
+              three of them first.
+            </span>
+          </h2>
+          <p className="max-w-xs text-sm text-[hsl(var(--muted))] sm:text-base">
+            Hackathons and engineering competitions, most recent first. Open one
+            for the full story.
+          </p>
+        </div>
+        <Record />
       </div>
     </section>
   );

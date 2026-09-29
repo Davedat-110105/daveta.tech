@@ -38,8 +38,8 @@ export function Contact() {
               Got a project that needs an engineer?
             </h2>
             <p className="mt-5 text-sm text-[hsl(var(--muted))] sm:text-base">
-              I&rsquo;m open to software, platform, and infrastructure work.
-              Tell me what needs to work and where it is stuck.
+              I&apos;m open to software, platform, and infrastructure work. Tell
+              me what needs to work and where it is stuck.
             </p>
           </div>
 

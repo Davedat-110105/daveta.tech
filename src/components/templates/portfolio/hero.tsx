@@ -1,23 +1,31 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import * as React from "react";
 import gsap from "gsap";
 
+import { HACKATHONS } from "@/data/hackathons";
 import { cn } from "@/lib/utils";
 
 import { ArrowUpRight, onAnchorClick, RingLink } from "./primitives";
 
 // The full pill is wider than a 375px viewport. Below `sm` the "Home" link
 // gives way (the logo already goes home) and the type tightens; every section
-// link stays.
+// link stays. The competition record gets its own item: it is the strongest
+// proof on the page and should be one click from anywhere.
 const NAV_LINKS = [
   { label: "Home", href: "#home", id: "home", compact: false },
   { label: "Work", href: "#work", id: "work", compact: true },
+  { label: "Record", href: "#record", id: "record", compact: true },
   { label: "Deploys", href: "#deploys", id: "deploys", compact: true },
   { label: "About", href: "#about", id: "about", compact: true },
-  { label: "Details", href: "#details", id: "details", compact: true },
 ];
+
+// Firsts lead, then the rest; each group keeps the record's newest-first order.
+const PODIUM = [...HACKATHONS].sort(
+  (a, b) => Number(a.rank !== "1st") - Number(b.rank !== "1st"),
+);
 
 function Logo() {
   return (
@@ -134,7 +142,7 @@ export function Hero({ start = true }: { start?: boolean }) {
       }
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
       // One authored entrance: the photograph settles from a slight zoom while
-      // the type rises through it. Nothing else in the hero moves on load.
+      // the name rises over it. Nothing else in the hero moves on load.
       tl.fromTo(
         ".hero-bg",
         { scale: 1.06 },
@@ -166,67 +174,101 @@ export function Hero({ start = true }: { start?: boolean }) {
     <section
       ref={rootRef}
       id="home"
-      className="relative flex min-h-dvh w-full flex-col items-center justify-center overflow-hidden py-28"
+      className="relative w-full overflow-hidden bg-[hsl(var(--bg))] md:min-h-dvh"
     >
       <Navbar />
 
-      <div className="absolute inset-0 z-0">
-        {/* Gaia Armellin, Unsplash. Alternates and credits are listed in
-            ./ATTRIBUTION.md; swap the path to try one. The beam is framed to
-            the upper right so the headline sits over dark rock. */}
-        <div className="hero-bg absolute inset-0">
+      {/* A studio sweep, not a picture: a faint lift behind the subject on
+          the flat field, the way a backdrop falls off under one light. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_45%_60%_at_50%_58%,hsl(0_0%_11%),transparent_70%)]"
+      />
+
+      <div className="relative mx-auto flex w-full max-w-[1400px] flex-col px-6 pt-24 md:block md:h-dvh md:min-h-[640px] md:px-10 md:pt-0 lg:px-16">
+        {/* Cut-out portrait, standing on the bottom edge. */}
+        <div className="hero-bg relative mx-auto h-[56svh] w-full max-w-[420px] md:absolute md:inset-x-0 md:bottom-0 md:h-[88%] md:max-w-none">
           <Image
-            src="/assets/hero/lighthouse.webp"
-            alt=""
+            src="/assets/hero/dave-portrait-cutout.png"
+            alt="Portrait of Dave Ta"
             fill
             priority
-            sizes="100vw"
-            className="object-cover object-[66%_40%] md:object-[50%_35%]"
+            sizes="(min-width: 768px) 60vh, 90vw"
+            className="object-contain object-bottom"
           />
         </div>
-        <div className="absolute inset-0 bg-[hsl(var(--bg))]/45" />
-        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[hsl(var(--bg))]/70 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-[hsl(var(--bg))] via-[hsl(var(--bg))]/40 to-transparent" />
-      </div>
 
-      <div className="relative z-20 flex max-w-5xl flex-col items-center px-6 text-center text-[hsl(var(--text))]">
-        {/* The previous site's hero copy, kept word for word: the name is
-            the headline, the claim sits under it in the text face. */}
-        <h1 className="name-reveal font-display text-7xl italic leading-[0.9] tracking-[-0.03em] opacity-0 sm:text-8xl md:text-[7.5rem] lg:text-[9rem]">
+        {/* The name runs across the portrait at poster scale, in front of it,
+            and bleeds off the bottom edge. */}
+        <p
+          aria-hidden="true"
+          className="name-reveal pointer-events-none relative z-10 -mt-[0.55em] select-none whitespace-nowrap text-center font-display text-[26vw] italic leading-[0.8] tracking-[-0.03em] text-[hsl(var(--text))] opacity-0 md:absolute md:inset-x-0 md:bottom-[0.02em] md:mt-0 md:text-[20vw]"
+        >
           Dave Ta
-        </h1>
-        <p className="blur-in mt-8 text-balance text-lg font-medium text-[hsl(var(--text))]/90 opacity-0 sm:text-xl md:text-2xl">
-          I build software. I keep it running too.
         </p>
-        <p className="blur-in mt-4 max-w-xl text-pretty text-sm leading-6 text-[hsl(var(--text))]/70 opacity-0 sm:text-base sm:leading-7">
-          Right now I&apos;m working on rocket telemetry, an IELTS site, and a
-          public MCP server. I run several other sites from a rack in Toronto.
-        </p>
-        <div className="blur-in mt-10 flex flex-wrap items-center justify-center gap-3 opacity-0">
-          {/* Same hover grammar as the nav's "Say hi": the accent ring rises
-              behind each pill. */}
-          <RingLink
-            href="#work"
-            innerClassName="bg-[hsl(var(--text))] px-6 py-3 text-sm font-medium text-[hsl(var(--bg))] group-hover:bg-[hsl(var(--surface))] group-hover:text-[hsl(var(--text))]"
-          >
-            See Works
-          </RingLink>
-          <RingLink
-            href="#contact"
-            innerClassName="bg-[hsl(var(--surface))]/80 px-6 py-3 text-sm text-[hsl(var(--text))] backdrop-blur-md"
-          >
-            Reach out
-          </RingLink>
-        </div>
-      </div>
 
-      <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-3">
-        <span className="text-xs uppercase tracking-[0.2em] text-[hsl(var(--muted))]">
-          Scroll
-        </span>
-        <span className="relative block h-10 w-px overflow-hidden bg-[hsl(var(--stroke))]">
-          <span className="accent-gradient animate-scroll-down absolute inset-x-0 top-0 block h-1/2 w-full" />
-        </span>
+        <div className="relative z-20 mt-8 flex flex-col gap-10 md:absolute md:inset-x-10 md:top-1/2 md:mt-0 md:-translate-y-[62%] md:flex-row md:items-start md:justify-between lg:inset-x-16">
+          <div className="max-w-[19rem]">
+            <h1 className="blur-in text-lg font-medium leading-snug opacity-0 sm:text-xl">
+              <span className="sr-only">Dave Ta. </span>I build software. I keep
+              it running too.
+            </h1>
+            <p className="blur-in mt-3 text-pretty text-sm leading-6 text-[hsl(var(--text))]/70 opacity-0">
+              Right now I&apos;m working on rocket telemetry, an IELTS site, and
+              a public MCP server. I run several other sites from a rack in
+              Toronto.
+            </p>
+            <div className="blur-in mt-6 flex flex-wrap items-center gap-3 opacity-0">
+              {/* Same hover grammar as the nav's "Say hi": the accent ring
+                  rises behind each pill. */}
+              <RingLink
+                href="#work"
+                innerClassName="bg-[hsl(var(--text))] px-5 py-2.5 text-sm font-medium text-[hsl(var(--bg))] group-hover:bg-[hsl(var(--surface))] group-hover:text-[hsl(var(--text))]"
+              >
+                See my work
+              </RingLink>
+              <RingLink
+                href="#contact"
+                innerClassName="bg-[hsl(var(--surface))] px-5 py-2.5 text-sm text-[hsl(var(--text))]"
+              >
+                Reach out
+              </RingLink>
+            </div>
+          </div>
+
+          {/* The record, stated up front: the strongest proof on the page
+              should not wait 5,000px. Each placement opens its write-up. */}
+          <ul
+            aria-label="Competition placements"
+            className="blur-in w-full max-w-[17rem] border-t border-[hsl(var(--stroke))] opacity-0"
+          >
+            {PODIUM.map((hackathon) => (
+              <li
+                key={hackathon.slug}
+                className="border-b border-[hsl(var(--stroke))]"
+              >
+                <Link
+                  href={`/hackathons/${hackathon.slug}`}
+                  className="group flex items-baseline gap-4 py-2.5"
+                >
+                  <span
+                    className={cn(
+                      "w-10 shrink-0 font-display text-2xl italic leading-none",
+                      hackathon.rank === "1st"
+                        ? "text-[hsl(var(--signal))]"
+                        : "text-[hsl(var(--text))]/60",
+                    )}
+                  >
+                    {hackathon.rank}
+                  </span>
+                  <span className="text-xs leading-snug text-[hsl(var(--muted))] transition-colors duration-300 group-hover:text-[hsl(var(--text))]">
+                    {hackathon.name}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );

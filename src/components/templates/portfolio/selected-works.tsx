@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { ArrowUpRight, PlateImage, SectionHeader } from "./primitives";
 
 /**
- * The five flagship builds. Swap a card by editing one entry: `image` points
+ * The six flagship builds. Swap a card by editing one entry: `image` points
  * at `public/assets/…` and falls back to a labelled plate while the file is
  * missing, so a slot waiting on a screenshot reads as reserved.
  */
@@ -18,6 +18,13 @@ const PROJECTS = [
     image: "/assets/shot-astralab.jpg",
     href: "https://www.astralab.space",
     span: "md:col-span-7",
+  },
+  {
+    title: "Threshold",
+    descriptor: "1st place at Seneca Energy Hackathon 2026",
+    image: "/assets/seneca-hackathon/seneca-hackathon-threshold-team.jpeg",
+    href: "https://github.com/Davedat-110105/project_threshold",
+    span: "md:col-span-5",
   },
   {
     title: "Hana IELTS",
@@ -31,7 +38,7 @@ const PROJECTS = [
     descriptor: "3rd place at CentennialHacks 2026",
     image: "/assets/shot-greenlight.jpg",
     href: "https://github.com/naik26m3/centennialhacks2026",
-    span: "md:col-span-6",
+    span: "md:col-span-7",
   },
   {
     title: "SuperWeb",
@@ -44,8 +51,8 @@ const PROJECTS = [
     title: "MCP Platform",
     descriptor: "Public MCP server running on Railway",
     image: "/assets/shot-mcp-live-docs.webp",
-    href: "https://gateway-production-c71a.up.railway.app/docs",
-    span: "md:col-span-12",
+    href: "https://mcp.consonance.work",
+    span: "md:col-span-6",
   },
 ];
 

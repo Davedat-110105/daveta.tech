@@ -69,7 +69,7 @@ Confirmed credentials (do not add others):
 - Oracle Cloud Infrastructure AI Foundations
 - CS50 SQL certificate
 - CompTIA Linux+
-- 2026 Energy Hackathon Challenge Set Winner
+- 2026 Seneca Energy Hackathon, First Place (Threshold)
 - President's Honour List
 
 Absences future work must not fabricate: user counts, revenue, client logos, volunteer roles, homelab diagrams with real hosts, stealth product screenshots without permission.

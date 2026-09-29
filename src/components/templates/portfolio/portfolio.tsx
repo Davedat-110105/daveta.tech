@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 import { Contact } from "./contact";
 import { Details } from "./details";
-import { Experience } from "./experience";
+import { CompetitionRecord, Experience } from "./experience";
 import { Explorations } from "./explorations";
 import { dancingScript, inter, instrumentSerif } from "./fonts";
 import { Hero } from "./hero";
@@ -18,6 +18,18 @@ import { PORTFOLIO_STYLES } from "./styles";
 
 export default function Portfolio() {
   const [isLoading, setIsLoading] = React.useState(true);
+
+  // Greet once per session. Coming back from a competition page should land
+  // on the record, not replay the greeting. Layout effect so a client-side
+  // navigation never paints the overlay.
+  React.useLayoutEffect(() => {
+    try {
+      if (sessionStorage.getItem("pf-greeted")) setIsLoading(false);
+      else sessionStorage.setItem("pf-greeted", "1");
+    } catch {
+      // Storage blocked: greet every time, as before.
+    }
+  }, []);
 
   return (
     <div
@@ -40,6 +52,7 @@ export default function Portfolio() {
 
         <Hero start={!isLoading} />
         <SelectedWorks />
+        <CompetitionRecord />
         <Journal />
         <Experience />
         <Explorations />
