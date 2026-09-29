@@ -18,7 +18,7 @@ export const site = {
   region: "ON",
   country: "CA",
   description:
-    "Software engineer in Toronto building web products, AI tools, and the systems that keep them working.",
+    "Software engineer in Toronto. I build web products and AI tools and keep them running.",
 } as const;
 
 /**

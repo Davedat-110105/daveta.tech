@@ -9,7 +9,7 @@ import { motion } from "motion/react";
  * nowhere else on the page, set in the mono face, with no animated numbers.
  */
 const ROWS: Array<[string, string]> = [
-  ["Based", "Toronto, Ontario — EST"],
+  ["Based", "Toronto, Ontario, EST"],
   ["Studying", "AI & Computer Engineering Technology, Seneca Polytechnic"],
   ["Writing", "TypeScript · Python · SQL · Bash"],
   ["Building on", "Next.js · Postgres · Prisma · Docker · S3"],

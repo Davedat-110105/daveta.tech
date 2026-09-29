@@ -162,8 +162,8 @@ export function Explorations() {
             <span className="font-display italic font-normal">builds</span>
           </h2>
           <p className="mx-auto mt-4 max-w-sm text-sm text-[hsl(var(--muted))]">
-            Rocketry hardware, the rack that serves half of this list, and the
-            rooms the work actually happens in.
+            Rocket hardware, the rack that serves half the sites above, and
+            the rooms where the work happens.
           </p>
           <div className="pointer-events-auto mt-7 flex justify-center">
             <RingLink

@@ -33,12 +33,23 @@ export const PORTFOLIO_STYLES = `
 [data-slot="portfolio"] .animate-scroll-down {
   animation: pf-scroll-down 1.5s ease-in-out infinite;
 }
+[data-slot="portfolio"] .animate-marquee {
+  animation: pf-marquee 60s linear infinite;
+}
+[data-slot="portfolio"] .animate-marquee:hover,
+[data-slot="portfolio"] .animate-marquee:focus-within {
+  animation-play-state: paused;
+}
 [data-slot="portfolio"] .animate-role-fade-in {
   animation: pf-role-fade-in 0.4s ease-out both;
 }
 @keyframes pf-scroll-down {
   0% { transform: translateY(-100%); }
   100% { transform: translateY(200%); }
+}
+@keyframes pf-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 @keyframes pf-role-fade-in {
   0% { opacity: 0; transform: translateY(8px); }
@@ -51,6 +62,7 @@ export const PORTFOLIO_STYLES = `
 }
 @media (prefers-reduced-motion: reduce) {
   [data-slot="portfolio"] .animate-scroll-down,
+  [data-slot="portfolio"] .animate-marquee,
   [data-slot="portfolio"] .accent-gradient-animated {
     animation: none;
   }

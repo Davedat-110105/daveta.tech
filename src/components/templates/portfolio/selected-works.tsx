@@ -57,7 +57,7 @@ export function SelectedWorks() {
           eyebrow="Selected Work"
           lead="A few things"
           accent="I built"
-          subtext="I wrote the code, worked on the deployments, and know where the rough edges are."
+          subtext="I wrote the code, did the deploys, and know where the rough edges are."
           viewAll={{
             label: "View all work",
             href: "https://github.com/Davedat-110105",
@@ -94,7 +94,7 @@ export function SelectedWorks() {
               <PlateImage
                 src={project.image}
                 alt={`${project.title}, ${project.descriptor}`}
-                label={`${project.title} — screenshot pending`}
+                label={`${project.title}, screenshot pending`}
                 sizes={
                   project.span === "md:col-span-12"
                     ? "(min-width: 1200px) 1072px, 100vw"

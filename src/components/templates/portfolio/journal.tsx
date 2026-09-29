@@ -51,7 +51,7 @@ export function Journal() {
           eyebrow="Deployments"
           lead="Live"
           accent="deployments"
-          subtext="Client sites and self-hosted services I built, shipped, and still keep running."
+          subtext="Client sites and self-hosted services I put up and still keep running."
           viewAll={{ label: "View all", href: "https://github.com/Davedat-110105" }}
           className="mb-10 md:mb-14"
         />

@@ -13,3 +13,12 @@ ours and the licence below is the one it shipped with.
 
 If you are the author and want this listing changed or removed, write to
 support@21st.dev and it is done the same day.
+
+## Hero photograph
+
+The hero background in `public/assets/hero/` is not part of the template.
+It is from Unsplash under the Unsplash License.
+
+| File | Photographer | Source |
+|---|---|---|
+| lighthouse.webp | Gaia Armellin | https://unsplash.com/photos/8fZ_AbWPqsw |

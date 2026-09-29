@@ -8,12 +8,15 @@ import { cn } from "@/lib/utils";
 
 import { ArrowUpRight, onAnchorClick, RingLink } from "./primitives";
 
+// The full pill is wider than a 375px viewport. Below `sm` the "Home" link
+// gives way (the logo already goes home) and the type tightens; every section
+// link stays.
 const NAV_LINKS = [
-  { label: "Home", href: "#home", id: "home" },
-  { label: "Work", href: "#work", id: "work" },
-  { label: "Deploys", href: "#deploys", id: "deploys" },
-  { label: "About", href: "#about", id: "about" },
-  { label: "Details", href: "#details", id: "details" },
+  { label: "Home", href: "#home", id: "home", compact: false },
+  { label: "Work", href: "#work", id: "work", compact: true },
+  { label: "Deploys", href: "#deploys", id: "deploys", compact: true },
+  { label: "About", href: "#about", id: "about", compact: true },
+  { label: "Details", href: "#details", id: "details", compact: true },
 ];
 
 function Logo() {
@@ -86,7 +89,8 @@ function Navbar() {
                 onClick={(e) => onAnchorClick(e, link.href)}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "rounded-full px-3 py-1.5 text-xs transition-colors duration-200 sm:px-4 sm:py-2 sm:text-sm",
+                  "rounded-full px-2.5 py-1.5 text-[11px] transition-colors duration-200 sm:px-4 sm:py-2 sm:text-sm",
+                  !link.compact && "hidden sm:block",
                   isActive
                     ? "bg-[hsl(var(--stroke))]/50 text-[hsl(var(--text))]"
                     : "text-[hsl(var(--muted))] hover:bg-[hsl(var(--stroke))]/50 hover:text-[hsl(var(--text))]",
@@ -100,7 +104,7 @@ function Navbar() {
         <span className="mx-1 hidden h-5 w-px bg-[hsl(var(--stroke))] sm:block" />
         <RingLink
           href="#contact"
-          innerClassName="bg-[hsl(var(--surface))] px-3 py-1.5 text-xs text-[hsl(var(--text))] backdrop-blur-md sm:px-4 sm:py-2 sm:text-sm"
+          innerClassName="bg-[hsl(var(--surface))] px-2.5 py-1.5 text-[11px] text-[hsl(var(--text))] backdrop-blur-md sm:px-4 sm:py-2 sm:text-sm"
         >
           Say hi
           <ArrowUpRight className="size-3 rtl:-scale-x-100" />
@@ -125,13 +129,23 @@ export function Hero({ start = true }: { start?: boolean }) {
           y: 0,
           filter: "blur(0px)",
         });
+        gsap.set(".hero-bg", { scale: 1 });
         return;
       }
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      // One authored entrance: the photograph settles from a slight zoom while
+      // the type rises through it. Nothing else in the hero moves on load.
+      tl.fromTo(
+        ".hero-bg",
+        { scale: 1.06 },
+        { scale: 1, duration: 2.2, ease: "power2.out" },
+        0,
+      );
       tl.fromTo(
         ".name-reveal",
         { opacity: 0, y: 50 },
         { opacity: 1, y: 0, duration: 1.2, delay: 0.1 },
+        0,
       ).fromTo(
         ".blur-in",
         { opacity: 0, y: 20, filter: "blur(10px)" },
@@ -152,59 +166,57 @@ export function Hero({ start = true }: { start?: boolean }) {
     <section
       ref={rootRef}
       id="home"
-      className="relative flex h-dvh w-full flex-col items-center justify-center overflow-hidden"
+      className="relative flex min-h-dvh w-full flex-col items-center justify-center overflow-hidden py-28"
     >
       <Navbar />
 
       <div className="absolute inset-0 z-0">
-        <Image
-          src="/assets/hero-field.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover saturate-75"
-        />
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[hsl(var(--bg))] via-[hsl(var(--bg))]/35 to-transparent" />
+        {/* Gaia Armellin, Unsplash. Alternates and credits are listed in
+            ./ATTRIBUTION.md; swap the path to try one. The beam is framed to
+            the upper right so the headline sits over dark rock. */}
+        <div className="hero-bg absolute inset-0">
+          <Image
+            src="/assets/hero/lighthouse.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[66%_40%] md:object-[50%_35%]"
+          />
+        </div>
+        <div className="absolute inset-0 bg-[hsl(var(--bg))]/45" />
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[hsl(var(--bg))]/70 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-[hsl(var(--bg))] via-[hsl(var(--bg))]/40 to-transparent" />
       </div>
 
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-10 mx-auto grid w-full max-w-[1600px] grid-cols-12 divide-x divide-white/10 border-x border-white/10"
-      >
-        <span className="col-span-1" />
-        <span className="col-span-3" />
-        <span className="col-span-4" />
-        <span className="col-span-3" />
-        <span className="col-span-1" />
-      </div>
-
-      <div className="relative z-20 flex max-w-5xl flex-col items-center px-6 text-center text-white">
-        <p className="blur-in mb-5 text-xs uppercase tracking-[0.22em] text-white/65 opacity-0 sm:text-sm">
-          Dave Ta · Software engineer · Toronto
-        </p>
-        <h1 className="name-reveal max-w-4xl font-display text-5xl leading-[0.92] tracking-[-0.035em] opacity-0 sm:text-6xl md:text-7xl lg:text-8xl">
-          I build software that stays running.
+      <div className="relative z-20 flex max-w-5xl flex-col items-center px-6 text-center text-[hsl(var(--text))]">
+        {/* The previous site's hero copy, kept word for word: the name is
+            the headline, the claim sits under it in the text face. */}
+        <h1 className="name-reveal font-display text-7xl italic leading-[0.9] tracking-[-0.03em] opacity-0 sm:text-8xl md:text-[7.5rem] lg:text-[9rem]">
+          Dave Ta
         </h1>
-        <p className="blur-in mb-10 mt-7 max-w-2xl text-sm leading-6 text-white/70 opacity-0 sm:text-base sm:leading-7">
-          Rocket telemetry, learning platforms, public MCP services, and the
-          infrastructure behind them.
+        <p className="blur-in mt-8 text-balance text-lg font-medium text-[hsl(var(--text))]/90 opacity-0 sm:text-xl md:text-2xl">
+          I build software. I keep it running too.
         </p>
-        <div className="blur-in opacity-0">
-          <a
+        <p className="blur-in mt-4 max-w-xl text-pretty text-sm leading-6 text-[hsl(var(--text))]/70 opacity-0 sm:text-base sm:leading-7">
+          Right now I&apos;m working on rocket telemetry, an IELTS site, and a
+          public MCP server. I run several other sites from a rack in Toronto.
+        </p>
+        <div className="blur-in mt-10 flex flex-wrap items-center justify-center gap-3 opacity-0">
+          {/* Same hover grammar as the nav's "Say hi": the accent ring rises
+              behind each pill. */}
+          <RingLink
             href="#work"
-            onClick={(e) => onAnchorClick(e, "#work")}
-            className="group inline-flex items-stretch gap-px rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+            innerClassName="bg-[hsl(var(--text))] px-6 py-3 text-sm font-medium text-[hsl(var(--bg))] group-hover:bg-[hsl(var(--surface))] group-hover:text-[hsl(var(--text))]"
           >
-            <span className="flex items-center rounded-full bg-white px-6 text-sm font-medium text-black transition-colors duration-300 group-hover:bg-[#16212b] group-hover:text-white">
-              See my work
-            </span>
-            <span className="relative flex size-12 items-center justify-center overflow-hidden rounded-full bg-white text-black transition-colors duration-300 group-hover:bg-[#16212b] group-hover:text-white">
-              <ArrowUpRight className="absolute size-4 transition-transform duration-500 ease-out group-hover:translate-x-8 group-hover:-translate-y-8 rtl:-scale-x-100" />
-              <ArrowUpRight className="absolute size-4 -translate-x-8 translate-y-8 transition-transform duration-500 ease-out group-hover:translate-x-0 group-hover:translate-y-0 rtl:-scale-x-100" />
-            </span>
-          </a>
+            See Works
+          </RingLink>
+          <RingLink
+            href="#contact"
+            innerClassName="bg-[hsl(var(--surface))]/80 px-6 py-3 text-sm text-[hsl(var(--text))] backdrop-blur-md"
+          >
+            Reach out
+          </RingLink>
         </div>
       </div>
 
