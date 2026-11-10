@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Piano } from "./piano";
+import { SnapCarousel } from "./snap-carousel";
 
 const recording = { file: "piano-222", duration: "2:22" };
 
@@ -23,6 +24,24 @@ const homelab = [
     note: "A Jetson Nano for robotics, ribbon cable and all",
   },
 ];
+
+function HomelabShot({ shot, sizes }: { shot: (typeof homelab)[number]; sizes: string }) {
+  return (
+    <figure className="group">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-[hsl(var(--stroke))] bg-[hsl(var(--surface))]">
+        <Image
+          src={shot.src}
+          alt={shot.alt}
+          fill
+          draggable={false}
+          sizes={sizes}
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+        />
+      </div>
+      <figcaption className="pt-3 text-sm text-[hsl(var(--body))]">{shot.note}</figcaption>
+    </figure>
+  );
+}
 
 /**
  * The piano recording is the centerpiece: the video sits large under the same
@@ -115,21 +134,18 @@ export function PersonalNotes() {
             Where my side projects live, and sometimes where they go to rest.
           </p>
         </div>
-        <ul className="-mx-6 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
+        {/* Phones get a swipeable carousel; wider screens see all three at once. */}
+        <div className="mt-8 md:hidden">
+          <SnapCarousel label="Homelab photos" peek={36} gap={12}>
+            {homelab.map((shot) => (
+              <HomelabShot key={shot.src} shot={shot} sizes="80vw" />
+            ))}
+          </SnapCarousel>
+        </div>
+        <ul className="mt-8 hidden gap-4 md:grid md:grid-cols-3">
           {homelab.map((shot) => (
-            <li key={shot.src} className="w-[62vw] max-w-[260px] shrink-0 snap-start md:w-auto md:max-w-none">
-              <figure className="group">
-                <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-[hsl(var(--stroke))] bg-[hsl(var(--surface))]">
-                  <Image
-                    src={shot.src}
-                    alt={shot.alt}
-                    fill
-                    sizes="(min-width: 768px) 380px, 62vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                  />
-                </div>
-                <figcaption className="pt-3 text-sm text-[hsl(var(--body))]">{shot.note}</figcaption>
-              </figure>
+            <li key={shot.src}>
+              <HomelabShot shot={shot} sizes="380px" />
             </li>
           ))}
         </ul>

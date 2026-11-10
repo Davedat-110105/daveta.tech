@@ -81,15 +81,6 @@ export const PORTFOLIO_STYLES = `
   0% { opacity: 0; transform: translateY(8px); }
   100% { opacity: 1; transform: translateY(0); }
 }
-/* A played note floats up off the keyboard and fades. */
-[data-slot="portfolio"] .pf-note-rise {
-  animation: pf-note-rise 1.2s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
-}
-@keyframes pf-note-rise {
-  0% { opacity: 0; transform: translate(-50%, 6px) scale(0.8); }
-  15% { opacity: 1; }
-  100% { opacity: 0; transform: translate(-50%, -64px) scale(1.25) rotate(-12deg); }
-}
 @keyframes pf-gradient-shift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -100,9 +91,6 @@ export const PORTFOLIO_STYLES = `
     overflow-x: auto;
   }
   [data-slot="portfolio"] .credential-copy {
-    display: none;
-  }
-  [data-slot="portfolio"] .pf-note-rise {
     display: none;
   }
   [data-slot="portfolio"] .credential-track,

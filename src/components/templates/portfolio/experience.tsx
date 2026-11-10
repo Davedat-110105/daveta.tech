@@ -46,6 +46,8 @@ type Role = {
   website?: string;
   image?: string;
   imageClassName?: string;
+  /** A one-colour logo drawn as a mask, so it can take the brand colour. */
+  mark?: { src: string; color: string };
   description: string[];
   events?: ClubEvent[];
 };
@@ -108,8 +110,8 @@ const ROLES: Role[] = [
     position: "Tech Lead",
     location: "Toronto, ON",
     domain: "Cloud",
-    image: "/assets/aws/aws-logo.svg",
-    imageClassName: "object-contain p-14 sm:p-24",
+    // The club's own chip mark from awsseneca.com, in the orange its site uses.
+    mark: { src: "/assets/aws/sbg-logo.png", color: "#ff9900" },
     description: [
       "I build workshop projects and help plan sessions where students can deploy an app and see how the cloud services fit together.",
     ],
@@ -637,6 +639,27 @@ function RoleRow({ role, isFirst }: { role: Role; isFirst: boolean }) {
           imageClassName={role.imageClassName}
           plateClassName="opacity-0"
         />
+      ) : null}
+      {role.mark ? (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-30"
+        >
+          <span
+            className="block size-40 sm:size-56"
+            style={{
+              backgroundColor: role.mark.color,
+              WebkitMaskImage: `url(${role.mark.src})`,
+              maskImage: `url(${role.mark.src})`,
+              WebkitMaskSize: "contain",
+              maskSize: "contain",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+              WebkitMaskPosition: "center",
+              maskPosition: "center",
+            }}
+          />
+        </span>
       ) : null}
       <span
         aria-hidden="true"

@@ -2,160 +2,24 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
-const keys = [
-  { note: "C4", midi: 60, shortcut: "a", slot: 0 },
-  { note: "C sharp 4", midi: 61, shortcut: "w", slot: 1, sharp: true },
-  { note: "D4", midi: 62, shortcut: "s", slot: 1 },
-  { note: "D sharp 4", midi: 63, shortcut: "e", slot: 2, sharp: true },
-  { note: "E4", midi: 64, shortcut: "d", slot: 2 },
-  { note: "F4", midi: 65, shortcut: "f", slot: 3 },
-  { note: "F sharp 4", midi: 66, shortcut: "t", slot: 4, sharp: true },
-  { note: "G4", midi: 67, shortcut: "g", slot: 4 },
-  { note: "G sharp 4", midi: 68, shortcut: "y", slot: 5, sharp: true },
-  { note: "A4", midi: 69, shortcut: "h", slot: 5 },
-  { note: "A sharp 4", midi: 70, shortcut: "u", slot: 6, sharp: true },
-  { note: "B4", midi: 71, shortcut: "j", slot: 6 },
-  { note: "C5", midi: 72, shortcut: "k", slot: 7 },
-];
-
-/** Ode to Joy, Beethoven (public domain), as [midi, beats]. */
-const TUNE: Array<[number, number]> = [
-  [64, 1], [64, 1], [65, 1], [67, 1], [67, 1], [65, 1], [64, 1], [62, 1],
-  [60, 1], [60, 1], [62, 1], [64, 1], [64, 1.5], [62, 0.5], [62, 2],
-];
-const BEAT_MS = 380;
-
-/**
- * A small piano voice built from Web Audio parts: three slightly detuned
- * strings, a filter that starts bright and mellows as the note rings (the
- * way a struck string loses its top end), a short felt "knock" for the
- * hammer, and a little room reverb. Everything shares one bus and a gentle
- * compressor so chords do not clip.
- */
-type Engine = {
-  audio: AudioContext;
-  bus: GainNode;
-  noise: AudioBuffer;
-  tone: PeriodicWave;
-};
-
-type Voice = { stop: (soft?: boolean) => void; midi: number };
-
-function createEngine(): Engine {
-  const audio = new AudioContext();
-  const compressor = audio.createDynamicsCompressor();
-  compressor.threshold.value = -18;
-  compressor.ratio.value = 3;
-  compressor.connect(audio.destination);
-
-  const bus = audio.createGain();
-  bus.gain.value = 0.9;
-  bus.connect(compressor);
-
-  // A short, dark room: decaying noise as an impulse response.
-  const length = Math.floor(audio.sampleRate * 1.6);
-  const impulse = audio.createBuffer(2, length, audio.sampleRate);
-  for (let channel = 0; channel < 2; channel++) {
-    const data = impulse.getChannelData(channel);
-    for (let i = 0; i < length; i++) {
-      data[i] = (Math.random() * 2 - 1) * (1 - i / length) ** 3;
-    }
-  }
-  const reverb = audio.createConvolver();
-  reverb.buffer = impulse;
-  const wet = audio.createGain();
-  wet.gain.value = 0.22;
-  bus.connect(reverb).connect(wet).connect(compressor);
-
-  const noise = audio.createBuffer(1, Math.floor(audio.sampleRate * 0.04), audio.sampleRate);
-  const n = noise.getChannelData(0);
-  for (let i = 0; i < n.length; i++) n[i] = (Math.random() * 2 - 1) * (1 - i / n.length);
-
-  // Harmonics fall off quickly, with a slightly weak 7th like a real string.
-  const real = new Float32Array(10);
-  const imag = new Float32Array([0, 1, 0.55, 0.32, 0.2, 0.13, 0.08, 0.03, 0.04, 0.02]);
-  const tone = audio.createPeriodicWave(real, imag);
-
-  return { audio, bus, noise, tone };
-}
-
-function strike(engine: Engine, midi: number, held: boolean): Voice["stop"] {
-  const { audio, bus, noise, tone } = engine;
-  const time = audio.currentTime;
-  const frequency = 440 * 2 ** ((midi - 69) / 12);
-  // Higher notes ring shorter, as on a real piano.
-  const ring = 3.4 - (midi - 60) * 0.11;
-
-  const filter = audio.createBiquadFilter();
-  filter.type = "lowpass";
-  filter.Q.value = 0.6;
-  filter.frequency.setValueAtTime(Math.min(frequency * 14, 12000), time);
-  filter.frequency.exponentialRampToValueAtTime(frequency * 2.6, time + 1.2);
-
-  const amp = audio.createGain();
-  amp.gain.setValueAtTime(0.0001, time);
-  amp.gain.exponentialRampToValueAtTime(0.22, time + 0.006);
-  amp.gain.exponentialRampToValueAtTime(0.09, time + 0.35);
-  amp.gain.exponentialRampToValueAtTime(0.0001, time + (held ? ring : 1.1));
-  filter.connect(amp).connect(bus);
-
-  const strings = [-3, 0, 3.5].map((cents) => {
-    const oscillator = audio.createOscillator();
-    oscillator.setPeriodicWave(tone);
-    oscillator.frequency.value = frequency;
-    oscillator.detune.value = cents;
-    const level = audio.createGain();
-    level.gain.value = cents === 0 ? 0.5 : 0.28;
-    oscillator.connect(level).connect(filter);
-    oscillator.start(time);
-    oscillator.stop(time + (held ? ring : 1.1) + 0.05);
-    return oscillator;
-  });
-
-  const hammer = audio.createBufferSource();
-  hammer.buffer = noise;
-  const knock = audio.createBiquadFilter();
-  knock.type = "bandpass";
-  knock.frequency.value = Math.min(frequency * 3, 4000);
-  const knockLevel = audio.createGain();
-  knockLevel.gain.value = 0.06;
-  hammer.connect(knock).connect(knockLevel).connect(bus);
-  hammer.start(time);
-
-  strings[0].onended = () => {
-    amp.disconnect();
-    filter.disconnect();
-  };
-
-  return (soft = false) => {
-    const now = audio.currentTime;
-    const level = Math.max(amp.gain.value, 0.0001);
-    amp.gain.cancelScheduledValues(now);
-    amp.gain.setValueAtTime(level, now);
-    // The damper falls: a quick fade, a little slower when the key is let go gently.
-    amp.gain.setTargetAtTime(0.0001, now, soft ? 0.18 : 0.08);
-    strings.forEach((oscillator) => {
-      try {
-        oscillator.stop(now + 0.6);
-      } catch {
-        // Already stopped.
-      }
-    });
-  };
-}
-
-type Spark = { id: number; slot: number; sharp: boolean };
+import { createEngine, keys, SONGS, strike, type Engine, type Song, type Voice } from "./piano-audio";
+import { PianoLights, type LightsApi } from "./piano-lights";
 
 export function Piano() {
   const instructions = useId();
   const engine = useRef<Engine | null>(null);
   const voices = useRef(new Map<string, Voice>());
-  const sparkId = useRef(0);
+  const lights = useRef<LightsApi | null>(null);
+  const tapId = useRef(0);
   const tuneTimers = useRef<number[]>([]);
   const [playing, setPlaying] = useState<number[]>([]);
-  const [sparks, setSparks] = useState<Spark[]>([]);
-  const [tunePlaying, setTunePlaying] = useState(false);
+  const [songPlaying, setSongPlaying] = useState<string | null>(null);
   const [soundError, setSoundError] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
 
   const getEngine = useCallback(() => {
     if (!engine.current) engine.current = createEngine();
@@ -166,24 +30,21 @@ export function Piano() {
     return engine.current;
   }, []);
 
-  const sparkle = useCallback((midi: number) => {
-    const key = keys.find((item) => item.midi === midi);
-    if (!key) return;
-    const id = ++sparkId.current;
-    setSparks((current) => [...current.slice(-10), { id, slot: key.slot, sharp: !!key.sharp }]);
-    window.setTimeout(() => setSparks((current) => current.filter((spark) => spark.id !== id)), 1300);
-  }, []);
-
   const sync = () => setPlaying(Array.from(voices.current.values(), (voice) => voice.midi));
 
   function play(midi: number, input?: string) {
     if (input && voices.current.has(input)) return;
     try {
       const stop = strike(getEngine(), midi, Boolean(input));
-      sparkle(midi);
       if (input) {
         voices.current.set(input, { stop, midi });
+        lights.current?.on(midi, input);
         sync();
+      } else {
+        // A tap with no hold (keyboard activation): a short burst of light.
+        const id = `tap:${++tapId.current}`;
+        lights.current?.on(midi, id);
+        window.setTimeout(() => lights.current?.off(id), 160);
       }
     } catch {
       setSoundError(true);
@@ -195,20 +56,27 @@ export function Piano() {
     if (!voice) return;
     voices.current.delete(input);
     voice.stop(true);
+    lights.current?.off(input);
     sync();
   }
 
   const stopTune = useCallback(() => {
     tuneTimers.current.forEach((timer) => window.clearTimeout(timer));
     tuneTimers.current = [];
-    setTunePlaying(false);
+    voices.current.forEach((voice, input) => {
+      if (!input.startsWith("tune:")) return;
+      voice.stop(true);
+      lights.current?.off(input);
+      voices.current.delete(input);
+    });
+    setPlaying(Array.from(voices.current.values(), (voice) => voice.midi));
+    setSongPlaying(null);
   }, []);
 
-  function playTune() {
-    if (tunePlaying) {
-      stopTune();
-      return;
-    }
+  function playSong(song: Song) {
+    const wasThis = songPlaying === song.id;
+    stopTune();
+    if (wasThis) return;
     let engineNow: Engine;
     try {
       engineNow = getEngine();
@@ -216,33 +84,33 @@ export function Piano() {
       setSoundError(true);
       return;
     }
-    setTunePlaying(true);
+    setSongPlaying(song.id);
     let at = 0;
-    TUNE.forEach(([midi, beats], index) => {
+    song.notes.forEach(([midi, beats], index) => {
+      if (midi < 0) {
+        at += beats * song.beatMs;
+        return;
+      }
       const input = `tune:${index}`;
       tuneTimers.current.push(
         window.setTimeout(() => {
           const stop = strike(engineNow, midi, true);
-          sparkle(midi);
           voices.current.set(input, { stop, midi });
+          lights.current?.on(midi, input);
           sync();
         }, at),
-        window.setTimeout(() => {
-          const voice = voices.current.get(input);
-          if (voice) {
-            voices.current.delete(input);
-            voice.stop(true);
-            sync();
-          }
-        }, at + beats * BEAT_MS * 0.92),
+        window.setTimeout(() => release(input), at + beats * song.beatMs * 0.92),
       );
-      at += beats * BEAT_MS;
+      at += beats * song.beatMs;
     });
-    tuneTimers.current.push(window.setTimeout(() => setTunePlaying(false), at));
+    tuneTimers.current.push(window.setTimeout(() => setSongPlaying(null), at));
   }
 
   const releaseAll = useCallback(() => {
-    voices.current.forEach((voice) => voice.stop());
+    voices.current.forEach((voice, input) => {
+      voice.stop();
+      lights.current?.off(input);
+    });
     voices.current.clear();
     setPlaying([]);
   }, []);
@@ -261,34 +129,34 @@ export function Piano() {
   }, [releaseAll, stopTune]);
 
   return (
-    <div className="rounded-2xl border border-[hsl(var(--stroke))] bg-[linear-gradient(180deg,#17191d,#0e0f12)] p-3 shadow-xl shadow-black/40 sm:p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
+    <div className="overflow-hidden rounded-2xl border border-[hsl(var(--stroke))] bg-[linear-gradient(180deg,#07080b,#0e0f12)] shadow-xl shadow-black/40">
+      <div className="px-3 pt-3 sm:px-4 sm:pt-4">
         <p id={instructions} className="text-xs leading-relaxed text-[hsl(var(--muted))]">
-          Tap a key, or type the letters on it.
+          Tap a key, type the letters on it, or let it play one of these.
         </p>
-        <button
-          type="button"
-          onClick={playTune}
-          aria-pressed={tunePlaying}
-          className="inline-flex min-h-9 shrink-0 cursor-pointer items-center gap-2 rounded-full border border-[hsl(var(--stroke))] px-3 text-xs font-semibold text-[hsl(var(--text))] transition-colors hover:border-[hsl(var(--signal))]/60 hover:text-[hsl(var(--signal))] aria-pressed:border-[hsl(var(--signal))]/60 aria-pressed:text-[hsl(var(--signal))]"
-        >
-          <span aria-hidden="true">{tunePlaying ? "■" : "♪"}</span>
-          {tunePlaying ? "Stop" : "Play a tune"}
-        </button>
+        <div role="group" aria-label="Play a song" className="mt-3 flex flex-wrap gap-2">
+          {SONGS.map((song) => {
+            const on = songPlaying === song.id;
+            return (
+              <button
+                key={song.id}
+                type="button"
+                onClick={() => playSong(song)}
+                aria-pressed={on}
+                className="inline-flex min-h-9 shrink-0 cursor-pointer items-center gap-2 rounded-full border border-[hsl(var(--stroke))] px-3 text-xs font-semibold text-[hsl(var(--text))] transition-colors hover:border-[hsl(var(--signal))]/60 hover:text-[hsl(var(--signal))] aria-pressed:border-[hsl(var(--signal))]/70 aria-pressed:bg-[hsl(var(--signal))]/10 aria-pressed:text-[hsl(var(--signal))]"
+              >
+                <span aria-hidden="true">{on ? "■" : "♪"}</span>
+                {song.name}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="relative">
-        {/* Notes float up from whatever was just played. */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-2 z-30 h-0">
-          {sparks.map((spark) => (
-            <span
-              key={spark.id}
-              className="pf-note-rise absolute -translate-x-1/2 text-lg text-[hsl(var(--signal))] drop-shadow-[0_0_8px_hsl(var(--signal)/0.8)]"
-              style={{ left: `${spark.slot * 12.5 + (spark.sharp ? 0 : 6.25)}%` }}
-            >
-              ♪
-            </span>
-          ))}
+      <div className="px-3 pb-3 sm:px-4 sm:pb-4">
+        {/* The stage the light rises into. */}
+        <div className="h-40 sm:h-52">
+          <PianoLights apiRef={lights} reduceMotion={reduceMotion} />
         </div>
 
         {/* The red felt strip that sits behind the keys of a real piano. */}
@@ -338,7 +206,7 @@ export function Piano() {
           ))}
         </div>
       </div>
-      {soundError ? <p role="status" className="mt-2 text-sm">Sound couldn’t start. Try pressing a key again.</p> : null}
+      {soundError ? <p role="status" className="px-4 pb-3 text-sm">Sound couldn’t start. Try pressing a key again.</p> : null}
     </div>
   );
 }
