@@ -13,6 +13,8 @@ export type HackathonPhoto = {
   alt: string;
   width: number;
   height: number;
+  /** Diagrams and screenshots show whole; photos may be cropped to fill. */
+  fit?: "contain";
 };
 
 export type HackathonSection = {
@@ -39,6 +41,8 @@ export type Hackathon = {
   stack?: string[];
   links?: Array<{ label: string; href: string }>;
   photos: HackathonPhoto[];
+  /** The event's own badge, shown in the homepage record instead of a photo. */
+  mark?: { src: string; alt: string };
 };
 
 export const HACKATHONS: Hackathon[] = [
@@ -126,7 +130,7 @@ export const HACKATHONS: Hackathon[] = [
     rank: "1st",
     project: "Threshold",
     summary:
-      "Threshold is a civic data platform for community energy vulnerability: public datasets and live signals fused into a map with scores, source citations, and recommended actions.",
+      "We built a map showing which Brampton neighbourhoods are most vulnerable during a heatwave or ice storm. Each score links to the public data behind it.",
     team: ["Dave Ta", "Jeremiah Danniel Wong", "Arlene Pham", "Kai Ngo"],
     stats: [
       { value: "9", label: "Public data feeds fused into one model" },
@@ -263,10 +267,70 @@ export const HACKATHONS: Hackathon[] = [
     host: "Seneca Polytechnic",
     rank: "1st",
     project: "Job Posting Validity Checker",
+    // Source: the team README and code at
+    // github.com/minsikpaul92/SEC2025-1st-JobPostingValidityChecker
     summary:
-      "A tool that flags fraudulent job listings before someone applies to them.",
-    sections: [],
-    photos: [],
+      "A web app that checks a job posting against Ontario's 2026 job posting transparency rules and returns a valid or invalid verdict, with the reasons.",
+    role: "Frontend and DevOps",
+    team: ["Dave Ta", "Minsik Kim", "Khai Ngo"],
+    sections: [
+      {
+        label: "Brief",
+        heading: "Does this posting follow the new Ontario rules?",
+        body: [
+          "Ontario's 2026 transparency rules ask job postings for a pay range, the employment type, and a disclosure when AI is used to screen applicants, and they bar Canadian-experience requirements. The tool takes a posting as a structured form or as pasted text, and returns VALID or INVALID with a transparency score, a confidence level, and the fields that failed.",
+        ],
+      },
+      {
+        label: "My part",
+        heading: "The frontend flows, and a stack that starts with one command.",
+        body: [
+          "I built the two submission flows and wired them to the backend: a structured form and a raw-text box, each posting to its own FastAPI endpoint and feeding the same result panel.",
+          "I containerized the backend and frontend with Docker and wrote the Compose file, so the whole app starts with docker compose up --build.",
+        ],
+      },
+      {
+        label: "How it decides",
+        heading: "Hard rules first, a model second.",
+        body: [
+          "A rules engine runs first. Missing required fields, an out-of-range salary, an undisclosed use of AI, or a Canadian-experience clause makes a posting invalid on the spot. If nothing fails, a logistic regression text classifier and a random forest transparency scorer, both trained with scikit-learn, rate the posting.",
+          "Minsik Kim built the backend and both models. Khai Ngo designed the interface.",
+        ],
+      },
+    ],
+    stack: [
+      "React",
+      "TypeScript",
+      "Vite",
+      "Tailwind CSS",
+      "Python",
+      "FastAPI",
+      "scikit-learn",
+      "Docker Compose",
+    ],
+    links: [
+      {
+        label: "Source on GitHub",
+        href: "https://github.com/minsikpaul92/SEC2025-1st-JobPostingValidityChecker",
+      },
+    ],
+    mark: { src: "/assets/sec-2025/sec-badge.png", alt: "The SEC 2025 badge" },
+    photos: [
+      {
+        src: "/assets/sec-2025/userFlow.png",
+        alt: "The user flow: pick the form or text box tab, fill it in, check, then fix and recheck until the posting is valid",
+        width: 2517,
+        height: 979,
+        fit: "contain",
+      },
+      {
+        src: "/assets/sec-2025/wireframe.png",
+        alt: "The wireframe and palette: the job posting form, a Check button, and the result panel",
+        width: 2523,
+        height: 1129,
+        fit: "contain",
+      },
+    ],
   },
 ];
 

@@ -8,27 +8,6 @@ import { cn } from "@/lib/utils";
 
 const SECTION_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
 
-/**
- * Smooth-scroll in-page anchors within the iframe/document. External and
- * mailto links fall through to default navigation.
- */
-export function onAnchorClick(
-  event: React.MouseEvent<HTMLAnchorElement>,
-  href: string,
-) {
-  if (!href.startsWith("#") || href.length < 2) return;
-  const target = document.getElementById(href.slice(1));
-  if (!target) return;
-  event.preventDefault();
-  const reduce = window.matchMedia?.(
-    "(prefers-reduced-motion: reduce)",
-  ).matches;
-  target.scrollIntoView({
-    behavior: reduce ? "auto" : "smooth",
-    block: "start",
-  });
-}
-
 export function ArrowUpRight({ className }: { className?: string }) {
   return (
     <svg
@@ -91,7 +70,6 @@ export function RingLink({
       aria-label={ariaLabel}
       target={target}
       rel={rel ?? (target === "_blank" ? "noreferrer" : undefined)}
-      onClick={(e) => onAnchorClick(e, href)}
       className={cn("group relative inline-flex shrink-0", outerClassName)}
     >
       <span
@@ -133,12 +111,12 @@ export function ViewAllButton({
 }
 
 /**
- * Eyebrow + heading + subtext header shared by the Work, Journal and
- * Explorations sections. The emphasized word renders in the serif display
- * face. Reveals on scroll with Framer Motion.
+ * Heading + subtext header shared by the Work, Journal and Experience
+ * sections. The whole heading is set in the display serif, the same as every
+ * other section title. Reveals on scroll with Framer Motion.
  */
 export function SectionHeader({
-  eyebrow,
+  heading: Heading = "h2",
   lead,
   accent,
   trailing = "",
@@ -146,7 +124,7 @@ export function SectionHeader({
   viewAll,
   className,
 }: {
-  eyebrow: string;
+  heading?: "h2" | "h3";
   lead: string;
   accent: string;
   trailing?: string;
@@ -162,20 +140,18 @@ export function SectionHeader({
       viewport={{ once: true, margin: "-100px" }}
       className={className}
     >
-      <div className="flex items-center gap-3">
-        <span className="h-px w-8 bg-[hsl(var(--stroke))]" />
-        <span className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--muted))]">
-          {eyebrow}
-        </span>
-      </div>
-      <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-xl">
-          <h2 className="text-3xl font-medium leading-[1.05] tracking-tight sm:text-4xl lg:text-5xl">
-            {lead}{" "}
-            <span className="font-display italic font-normal">{accent}</span>
+          <Heading
+            className={cn(
+              "text-balance font-display leading-none",
+              Heading === "h2" ? "text-4xl sm:text-5xl lg:text-6xl" : "text-3xl sm:text-4xl",
+            )}
+          >
+            {lead} {accent}
             {trailing}
-          </h2>
-          <p className="mt-4 max-w-md text-sm text-[hsl(var(--muted))] sm:text-base">
+          </Heading>
+          <p className="mt-4 max-w-md text-base text-[hsl(var(--body))] sm:text-lg">
             {subtext}
           </p>
         </div>
@@ -227,7 +203,7 @@ export function PlateImage({
             "repeating-linear-gradient(135deg, hsl(var(--stroke))/0.6 0 1px, transparent 1px 11px)",
         }}
       >
-        <span className="px-3 text-[10px] uppercase tracking-[0.25em] text-[hsl(var(--muted))]">
+        <span className="px-3 text-xs text-[hsl(var(--muted))]">
           {label}
         </span>
       </span>

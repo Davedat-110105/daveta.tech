@@ -7,7 +7,7 @@ import {
   ArrowRight,
   ArrowUpRight,
 } from "@/components/templates/portfolio/primitives";
-import { inter, instrumentSerif } from "@/components/templates/portfolio/fonts";
+import { newsreader, sourceSans } from "@/components/templates/portfolio/fonts";
 import { PORTFOLIO_STYLES } from "@/components/templates/portfolio/styles";
 import { getHackathon, HACKATHONS } from "@/data/hackathons";
 import { cn } from "@/lib/utils";
@@ -32,17 +32,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function Kicker({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="h-px w-8 bg-[hsl(var(--stroke))]" />
-      <span className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--muted))]">
-        {children}
-      </span>
-    </div>
-  );
-}
-
 export default async function HackathonPage({ params }: Props) {
   const hackathon = getHackathon((await params).slug);
   if (!hackathon) notFound();
@@ -52,101 +41,83 @@ export default async function HackathonPage({ params }: Props) {
   const [cover, ...gallery] = hackathon.photos;
 
   return (
-    <div
+    <main
       data-slot="portfolio"
       id="main-content"
       tabIndex={-1}
       className={cn(
-        inter.variable,
-        instrumentSerif.variable,
+        sourceSans.variable,
+        newsreader.variable,
         "min-h-svh bg-[hsl(var(--bg))] text-[hsl(var(--text))] antialiased",
       )}
     >
       <style dangerouslySetInnerHTML={{ __html: PORTFOLIO_STYLES }} />
 
-      <div className="mx-auto max-w-[1200px] px-6 pb-24 pt-8 md:px-10 md:pt-12 lg:px-16">
+      <div className="mx-auto max-w-[1120px] px-6 pb-20 pt-6 md:px-10 md:pt-10">
         <Link
           href="/#record"
-          className="group inline-flex items-center gap-2 text-sm text-[hsl(var(--muted))] transition-colors duration-300 hover:text-[hsl(var(--text))]"
+          className="group inline-flex min-h-11 items-center gap-2 text-sm text-[hsl(var(--muted))] hover:text-[hsl(var(--text))]"
         >
           <ArrowRight className="size-3.5 rotate-180 transition-transform duration-300 group-hover:-translate-x-0.5 rtl:rotate-0" />
           Back to the record
         </Link>
 
-        <header className="mt-14 md:mt-20">
-          <Kicker>
-            {hackathon.date} · {hackathon.host}
-          </Kicker>
-          <div className="mt-6 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div className="max-w-3xl">
-              <h1 className="text-4xl font-medium leading-[1.02] tracking-tight sm:text-5xl lg:text-6xl">
-                {hackathon.project}
-              </h1>
-              <p className="mt-3 font-display text-xl italic text-[hsl(var(--muted))] sm:text-2xl">
-                {hackathon.event}
-              </p>
-            </div>
-            <p className="flex items-baseline gap-2">
-              <span className="font-display text-7xl italic leading-none sm:text-8xl lg:text-9xl">
-                {hackathon.rank}
-              </span>
-              <span className="text-[11px] uppercase tracking-[0.25em] text-[hsl(var(--muted))]">
-                place
-              </span>
+        {/* Image and story pairing informed by Editorial Image Hero on 21st.dev. */}
+        <header className={cn("mt-6 grid gap-7 border-b border-[hsl(var(--stroke))] pb-8 md:mt-9 md:items-center md:gap-12 md:pb-10", cover && "md:grid-cols-[minmax(0,1.15fr)_minmax(0,.85fr)]")}>
+          <div className="max-w-[60ch]">
+            <h1 className="text-balance font-display text-5xl leading-none sm:text-6xl">
+              {hackathon.project}
+            </h1>
+            <p className="mt-4 text-pretty text-lg leading-relaxed text-[hsl(var(--text))]/85">
+              {hackathon.summary}
+            </p>
+            <p className="mt-5 text-sm text-[hsl(var(--muted))]">
+              {hackathon.event} · {hackathon.date} · {hackathon.rank} place
             </p>
           </div>
-          <p className="mt-8 max-w-2xl text-pretty text-base leading-relaxed text-[hsl(var(--text))]/80 sm:text-lg">
-            {hackathon.summary}
-          </p>
+          {cover ? (
+            <figure>
+              <Image
+                src={cover.src}
+                alt=""
+                width={cover.width}
+                height={cover.height}
+                priority
+                sizes="(min-width: 768px) 440px, 90vw"
+                className="h-auto max-h-[25rem] w-full rounded-lg bg-[hsl(var(--surface))] object-contain"
+              />
+              <figcaption className="mt-2 text-sm text-[hsl(var(--muted))]">{cover.alt}</figcaption>
+            </figure>
+          ) : null}
         </header>
 
-        {cover ? (
-          <div className="relative mt-12 aspect-[16/10] overflow-hidden rounded-3xl border border-[hsl(var(--stroke))] bg-[hsl(var(--surface))] md:mt-16">
-            <Image
-              src={cover.src}
-              alt={cover.alt}
-              fill
-              priority
-              sizes="(min-width: 1200px) 1072px, 100vw"
-              className="object-cover"
-            />
-          </div>
-        ) : null}
-
         {hackathon.stats ? (
-          <dl className="mt-12 grid grid-cols-2 border-t border-[hsl(var(--stroke))] md:mt-16 md:grid-cols-4">
+          <dl className="grid grid-cols-2 gap-x-4 border-b border-[hsl(var(--stroke))] py-4 sm:grid-cols-4">
             {hackathon.stats.map((stat) => (
               <div
                 key={stat.label}
-                className="border-b border-[hsl(var(--stroke))] py-6 pe-4"
+                className="py-2"
               >
-                <dt className="sr-only">{stat.label}</dt>
-                <dd>
-                  <span className="block font-display text-5xl italic leading-none tabular-nums">
-                    {stat.value}
-                  </span>
-                  <span className="mt-3 block text-sm text-[hsl(var(--muted))]">
-                    {stat.label}
-                  </span>
-                </dd>
+                <dt className="text-sm text-[hsl(var(--muted))]">{stat.label}</dt>
+                <dd className="mt-1 font-medium tabular-nums">{stat.value}</dd>
               </div>
             ))}
           </dl>
         ) : null}
 
-        <div className="mt-16 grid gap-12 md:mt-24 md:grid-cols-12">
-          <div className="space-y-16 md:col-span-8">
+        <div className="mt-10 grid gap-10 md:mt-14 md:grid-cols-12">
+          <div className="space-y-10 md:col-span-8">
             {hackathon.sections.map((section) => (
               <section key={section.label}>
-                <Kicker>{section.label}</Kicker>
-                <h2 className="mt-5 text-2xl font-medium leading-tight tracking-tight sm:text-3xl">
-                  {section.heading}
+                <h2 className="text-xl font-medium leading-tight">
+                  {section.label}
                 </h2>
-                <div className="mt-5 space-y-4">
+                <p className="mt-2 text-pretty font-medium">{section.heading}</p>
+                <div className="mt-3 max-w-[65ch] space-y-3">
                   {section.body.map((para) => (
                     <p
                       key={para}
-                      className="text-pretty text-sm leading-relaxed text-[hsl(var(--muted))] sm:text-base"
+                      className="text-pretty text-base leading-relaxed text-[hsl(var(--body))]"
                     >
                       {para}
                     </p>
@@ -156,17 +127,17 @@ export default async function HackathonPage({ params }: Props) {
             ))}
           </div>
 
-          <aside className="space-y-10 md:col-span-4 md:border-s md:border-[hsl(var(--stroke))] md:ps-8">
+          <aside aria-label="Project details" className="space-y-6 border-t border-[hsl(var(--stroke))] pt-6 md:col-span-4 md:self-start md:border-s md:border-t-0 md:ps-6 md:pt-0">
             {hackathon.role ? (
               <div>
-                <Kicker>My role</Kicker>
-                <p className="mt-4 text-sm font-medium">{hackathon.role}</p>
+                <h2 className="font-medium">My role</h2>
+                <p className="mt-2 text-sm text-[hsl(var(--body))]">{hackathon.role}</p>
               </div>
             ) : null}
             {hackathon.team ? (
               <div>
-                <Kicker>Team</Kicker>
-                <ul className="mt-4 space-y-1.5 text-sm">
+                <h2 className="font-medium">Team</h2>
+                <ul className="mt-2 space-y-1.5 text-sm text-[hsl(var(--body))]">
                   {hackathon.team.map((member) => (
                     <li key={member}>{member}</li>
                   ))}
@@ -175,23 +146,14 @@ export default async function HackathonPage({ params }: Props) {
             ) : null}
             {hackathon.stack ? (
               <div>
-                <Kicker>Stack</Kicker>
-                <ul className="mt-4 flex flex-wrap gap-2">
-                  {hackathon.stack.map((item) => (
-                    <li
-                      key={item}
-                      className="rounded-full border border-[hsl(var(--stroke))] px-3 py-1 text-xs text-[hsl(var(--muted))]"
-                    >
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                <h2 className="font-medium">Stack</h2>
+                <p className="mt-2 text-sm leading-relaxed text-[hsl(var(--body))]">{hackathon.stack.join(", ")}</p>
               </div>
             ) : null}
             {hackathon.links ? (
               <div>
-                <Kicker>Links</Kicker>
-                <ul className="mt-4 space-y-2">
+                <h2 className="font-medium">Links</h2>
+                <ul className="mt-2 space-y-2">
                   {hackathon.links.map((link) => (
                     <li key={link.href}>
                       <a
@@ -223,7 +185,7 @@ export default async function HackathonPage({ params }: Props) {
                   alt={photo.alt}
                   fill
                   sizes="(min-width: 768px) 536px, 100vw"
-                  className="object-cover"
+                  className={photo.fit === "contain" ? "object-contain p-3" : "object-cover"}
                 />
               </div>
             ))}
@@ -241,7 +203,7 @@ export default async function HackathonPage({ params }: Props) {
             All competitions
           </Link>
           <Link href={`/hackathons/${next.slug}`} className="group text-end">
-            <span className="block text-xs uppercase tracking-[0.3em] text-[hsl(var(--muted))]">
+            <span className="block text-sm text-[hsl(var(--muted))]">
               Next
             </span>
             <span className="mt-2 inline-flex items-center gap-2 text-2xl font-medium tracking-tight sm:text-3xl">
@@ -251,6 +213,6 @@ export default async function HackathonPage({ params }: Props) {
           </Link>
         </nav>
       </div>
-    </div>
+    </main>
   );
 }

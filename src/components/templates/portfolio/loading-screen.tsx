@@ -24,22 +24,17 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
     onCompleteRef.current = onComplete;
   });
 
-  const reduce =
-    typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
   React.useEffect(() => {
-    const write = reduce ? 0 : WRITE_MS;
-    const toExit = setTimeout(() => setExiting(true), write + HOLD_MS);
+    const toExit = setTimeout(() => setExiting(true), WRITE_MS + HOLD_MS);
     const done = setTimeout(
       () => onCompleteRef.current(),
-      write + HOLD_MS + FADE_MS,
+      WRITE_MS + HOLD_MS + FADE_MS,
     );
     return () => {
       clearTimeout(toExit);
       clearTimeout(done);
     };
-  }, [reduce]);
+  }, []);
 
   return (
     <motion.div
@@ -47,13 +42,13 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
       initial={{ opacity: 1 }}
       animate={{ opacity: exiting ? 0 : 1 }}
       transition={{ duration: FADE_MS / 1000, ease: "easeInOut" }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-[hsl(var(--bg))]"
+      className="pointer-events-none fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-[hsl(var(--bg))]"
     >
       <motion.span
-        initial={{ clipPath: reduce ? "inset(0 0 0 0)" : "inset(0 100% 0 0)" }}
+        initial={{ clipPath: "inset(0 100% 0 0)" }}
         animate={{ clipPath: "inset(0 0 0 0)" }}
         transition={{
-          duration: reduce ? 0 : WRITE_MS / 1000,
+          duration: WRITE_MS / 1000,
           // Quick off the mark, easing out as the last letters land — the
           // cadence of a hand finishing a word, not a constant-rate wipe.
           ease: [0.32, 0.08, 0.24, 1],

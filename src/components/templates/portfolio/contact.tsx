@@ -29,15 +29,16 @@ export function Contact() {
      */
     <footer
       id="contact"
+      tabIndex={-1}
       className="border-t border-[hsl(var(--stroke))] bg-[hsl(var(--bg))]"
     >
       <div className="mx-auto max-w-[1200px] px-6 md:px-10 lg:px-16">
         <div className="flex flex-col gap-10 py-16 md:flex-row md:items-end md:justify-between md:py-24">
           <div className="max-w-xl">
-            <h2 className="text-3xl font-medium leading-[1.15] tracking-tight sm:text-4xl">
+            <h2 className="text-balance font-display text-4xl leading-none sm:text-5xl">
               Got a project that needs an engineer?
             </h2>
-            <p className="mt-5 text-sm text-[hsl(var(--muted))] sm:text-base">
+            <p className="mt-5 text-base text-[hsl(var(--body))] sm:text-lg">
               I&apos;m open to software, platform, and infrastructure work. Tell
               me what needs to work and where it is stuck.
             </p>
@@ -45,15 +46,15 @@ export function Contact() {
 
           <a
             href={`mailto:${EMAIL}`}
-            className="group inline-flex shrink-0 items-baseline gap-2 font-data text-base text-[hsl(var(--text))] underline decoration-[hsl(var(--stroke))] underline-offset-[6px] transition-colors duration-200 hover:decoration-[hsl(var(--text))] sm:text-lg"
+            className="group inline-flex min-w-0 items-baseline gap-2 text-base text-[hsl(var(--text))] underline decoration-[hsl(var(--stroke))] underline-offset-[6px] transition-colors duration-200 [overflow-wrap:anywhere] hover:decoration-[hsl(var(--text))] sm:text-lg"
           >
-            {EMAIL}
-            <ArrowUpRight className="size-4 translate-y-px rtl:-scale-x-100" />
+            <span className="min-w-0">{EMAIL}</span>
+            <ArrowUpRight className="size-4 shrink-0 translate-y-px rtl:-scale-x-100" />
           </a>
         </div>
 
         <div className="flex items-center justify-between gap-6 border-t border-[hsl(var(--stroke))] py-6">
-          <span className="font-data text-xs text-[hsl(var(--muted))]">
+          <span className="text-sm text-[hsl(var(--muted))]">
             &copy; 2026 Dave Ta &middot; Toronto
           </span>
 

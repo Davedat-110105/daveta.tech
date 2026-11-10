@@ -4,7 +4,6 @@ import Image from "next/image";
 import * as React from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { AnimatePresence, motion } from "motion/react";
 
 /**
  * Photographs from the days around the work, drifting past a heading that
@@ -101,7 +100,7 @@ export function Explorations() {
   const col2Ref = React.useRef<HTMLDivElement>(null);
   const [active, setActive] = React.useState<Item | null>(null);
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);
-  const closeRef = React.useRef<HTMLButtonElement>(null);
+  const dialogRef = React.useRef<HTMLDialogElement>(null);
 
   // Two columns drifting at slightly different speeds over the sticky
   // heading. Desktop widths only, and never under reduced motion.
@@ -140,21 +139,10 @@ export function Explorations() {
     setActive(item);
   };
 
-  const close = React.useCallback(() => {
-    setActive(null);
-    // Hand focus back to the photo that opened the preview.
-    triggerRef.current?.focus();
-  }, []);
-
-  React.useEffect(() => {
-    if (!active) return;
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [active, close]);
+  React.useLayoutEffect(() => {
+    const dialog = dialogRef.current;
+    if (active && dialog && !dialog.open) dialog.showModal();
+  }, [active]);
 
   return (
     <section
@@ -164,18 +152,10 @@ export function Explorations() {
     >
       <div className="pointer-events-none z-0 flex items-center justify-center px-6 md:sticky md:top-0 md:h-svh">
         <div className="text-center">
-          <div className="flex items-center justify-center gap-3">
-            <span className="h-px w-8 bg-[hsl(var(--stroke))]" />
-            <span className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--muted))]">
-              Off the clock
-            </span>
-            <span className="h-px w-8 bg-[hsl(var(--stroke))]" />
-          </div>
-          <h2 className="mt-5 text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl">
-            Behind the{" "}
-            <span className="font-display italic font-normal">builds</span>
+          <h2 className="text-balance font-display text-4xl leading-none sm:text-5xl lg:text-6xl">
+            Behind the builds
           </h2>
-          <p className="mx-auto mt-4 max-w-sm text-sm text-[hsl(var(--muted))]">
+          <p className="mx-auto mt-4 max-w-sm text-base text-[hsl(var(--body))] sm:text-lg">
             Photos from hackathon stages and campus AV shifts.
           </p>
         </div>
@@ -200,25 +180,25 @@ export function Explorations() {
         </div>
       </div>
 
-      <AnimatePresence>
+      <dialog
+        ref={dialogRef}
+        aria-label={active?.label}
+        onClose={() => {
+          setActive(null);
+          triggerRef.current?.focus({ preventScroll: true });
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) event.currentTarget.close();
+        }}
+        className="fixed inset-0 m-0 size-full max-h-none max-w-none flex-col items-center justify-center gap-4 overflow-auto overscroll-contain bg-transparent p-6 text-white backdrop:bg-black/90 open:flex"
+      >
         {active ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            role="dialog"
-            aria-modal="true"
-            aria-label={active.label}
-            onClick={close}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-black/90 p-6"
-          >
+          <>
             <button
-              ref={closeRef}
               type="button"
               aria-label="Close photo"
-              onClick={close}
-              className="absolute end-6 top-6 flex size-10 items-center justify-center rounded-full border border-white/15 text-white/80 transition-colors hover:text-white"
+              onClick={() => dialogRef.current?.close()}
+              className="absolute end-6 top-6 flex size-11 cursor-pointer items-center justify-center rounded-full border border-white/25 bg-black/80 text-white transition-colors hover:bg-white/20"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -238,13 +218,12 @@ export function Explorations() {
               width={active.width}
               height={active.height}
               sizes="90vw"
-              onClick={(e) => e.stopPropagation()}
-              className="h-auto max-h-[80vh] w-auto max-w-[90vw] rounded-2xl object-contain"
+              className="h-auto max-h-[70dvh] w-auto max-w-[90vw] rounded-2xl object-contain"
             />
             <p className="font-script text-xl text-white/80">{active.label}</p>
-          </motion.div>
+          </>
         ) : null}
-      </AnimatePresence>
+      </dialog>
     </section>
   );
 }

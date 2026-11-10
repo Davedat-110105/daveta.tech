@@ -7,24 +7,17 @@ import { cn } from "@/lib/utils";
 import { ArrowUpRight, PlateImage, SectionHeader } from "./primitives";
 
 /**
- * The six flagship builds. Swap a card by editing one entry: `image` points
+ * Selected projects. Swap a card by editing one entry: `image` points
  * at `public/assets/…` and falls back to a labelled plate while the file is
  * missing, so a slot waiting on a screenshot reads as reserved.
  */
 const PROJECTS = [
   {
-    title: "Astra Labs",
-    descriptor: "Rocket telemetry for Astra Labs",
-    image: "/assets/shot-astralab.jpg",
-    href: "https://www.astralab.space",
-    span: "md:col-span-7",
-  },
-  {
     title: "Threshold",
     descriptor: "1st place at Seneca Energy Hackathon 2026",
     image: "/assets/seneca-hackathon/seneca-hackathon-threshold-team.jpeg",
     href: "https://github.com/Davedat-110105/project_threshold",
-    span: "md:col-span-5",
+    span: "md:col-span-7",
   },
   {
     title: "Hana IELTS",
@@ -38,7 +31,7 @@ const PROJECTS = [
     descriptor: "3rd place at CentennialHacks 2026",
     image: "/assets/shot-greenlight.jpg",
     href: "https://github.com/naik26m3/centennialhacks2026",
-    span: "md:col-span-7",
+    span: "md:col-span-6",
   },
   {
     title: "SuperWeb",
@@ -52,16 +45,15 @@ const PROJECTS = [
     descriptor: "Public MCP server running on Railway",
     image: "/assets/shot-mcp-live-docs.webp",
     href: "https://mcp.consonance.work",
-    span: "md:col-span-6",
+    span: "md:col-span-12",
   },
 ];
 
 export function SelectedWorks() {
   return (
-    <section id="work" className="bg-[hsl(var(--bg))] py-12 md:py-16">
+    <section id="work" tabIndex={-1} className="bg-[hsl(var(--bg))] py-12 md:py-16">
       <div className="mx-auto max-w-[1200px] px-6 md:px-10 lg:px-16">
         <SectionHeader
-          eyebrow="Selected Work"
           lead="A few things"
           accent="I built"
           subtext="I wrote the code, did the deploys, and know where the rough edges are."
@@ -94,13 +86,13 @@ export function SelectedWorks() {
               }}
               transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
               className={cn(
-                "group relative block h-[320px] overflow-hidden rounded-3xl border border-[hsl(var(--stroke))] bg-[hsl(var(--surface))] transition-colors duration-300 hover:border-white/25 md:h-[440px]",
+                "group relative block h-[320px] overflow-hidden rounded-3xl border border-[hsl(var(--stroke))] bg-[hsl(var(--surface))] transition-colors duration-300 hover:border-white/25 focus-visible:opacity-100! md:h-[440px]",
                 project.span,
               )}
             >
               <PlateImage
                 src={project.image}
-                alt={`${project.title}, ${project.descriptor}`}
+                alt=""
                 label={`${project.title}, screenshot pending`}
                 sizes={
                   project.span === "md:col-span-12"
@@ -126,7 +118,7 @@ export function SelectedWorks() {
                   <span className="block text-lg font-medium leading-tight text-white md:text-xl">
                     {project.title}
                   </span>
-                  <span className="mt-1 block truncate text-xs text-white/65 md:text-sm">
+                  <span className="mt-1 block text-pretty text-sm text-white/80">
                     {project.descriptor}
                   </span>
                 </span>

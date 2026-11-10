@@ -1,14 +1,14 @@
-import { Dancing_Script, Inter, Instrument_Serif } from "next/font/google";
+import { Dancing_Script, Newsreader, Source_Sans_3 } from "next/font/google";
 
-export const inter = Inter({
-  variable: "--font-inter",
+export const sourceSans = Source_Sans_3({
+  variable: "--font-portfolio-sans",
   subsets: ["latin"],
   display: "swap",
 });
 
-export const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
-  subsets: ["latin", "latin-ext"],
+export const newsreader = Newsreader({
+  variable: "--font-portfolio-display",
+  subsets: ["latin"],
   weight: "400",
   style: ["normal", "italic"],
   display: "swap",

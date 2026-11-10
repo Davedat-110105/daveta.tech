@@ -1,5 +1,25 @@
 @import "tailwindcss";
 
+/* The pre-template components in src/components/ are no longer rendered
+   (only SkipLink is). Scanning them made the dev server emit a broken rule
+   for `[animation:riseIn_0.7s_ease_both]` in Hero.tsx, which dropped every
+   utility after it, including all sm:/md: layout. Keep them out of the scan. */
+@source not "../components/About.tsx";
+@source not "../components/Contact.tsx";
+@source not "../components/Counter.tsx";
+@source not "../components/DecoderText.tsx";
+@source not "../components/DeployRail.tsx";
+@source not "../components/Hero.tsx";
+@source not "../components/HeroField.tsx";
+@source not "../components/HeroGeometry.tsx";
+@source not "../components/Nav.tsx";
+@source not "../components/PointerDrift.tsx";
+@source not "../components/Record.tsx";
+@source not "../components/Reveal.tsx";
+@source not "../components/ScrollProgress.tsx";
+@source not "../components/SlotImage.tsx";
+@source not "../components/Work.tsx";
+
 :root {
   --night: #0b0f11;
   --surface: #151b1d;
@@ -48,9 +68,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 ::selection {
@@ -63,9 +85,17 @@ a {
   outline-offset: 4px;
 }
 
-:target,
-section[id] {
-  scroll-margin-top: 88px;
+html:has([data-portfolio-nav]) {
+  scroll-padding-top: calc(4.75rem + env(safe-area-inset-top));
+  scrollbar-gutter: stable;
+}
+
+html:has([data-club-events][open]) {
+  overflow: hidden;
+}
+
+[data-portfolio-nav] :is(a, button) {
+  touch-action: manipulation;
 }
 
 

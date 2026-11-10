@@ -27,12 +27,7 @@ export function Details() {
         transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
         className="mx-auto max-w-[1200px] px-6 md:px-10 lg:px-16"
       >
-        <div className="flex items-center gap-3">
-          <span className="h-px w-8 bg-[hsl(var(--stroke))]" />
-          <span className="font-data text-xs uppercase tracking-[0.3em] text-[hsl(var(--muted))]">
-            Details
-          </span>
-        </div>
+        <h2 className="text-base font-semibold text-[hsl(var(--text))]">Details</h2>
 
         <dl className="mt-8 border-t border-[hsl(var(--stroke))]">
           {ROWS.map(([key, value]) => (
@@ -40,10 +35,10 @@ export function Details() {
               key={key}
               className="grid grid-cols-1 gap-1 border-b border-[hsl(var(--stroke))] py-4 sm:grid-cols-[10rem_1fr] sm:gap-6 sm:py-5"
             >
-              <dt className="font-data text-xs uppercase tracking-[0.2em] text-[hsl(var(--muted))] sm:pt-0.5">
+              <dt className="text-sm text-[hsl(var(--muted))] sm:pt-0.5">
                 {key}
               </dt>
-              <dd className="font-data text-sm text-[hsl(var(--text))]/90 sm:text-[15px]">
+              <dd className="text-base text-[hsl(var(--text))]">
                 {value}
               </dd>
             </div>
